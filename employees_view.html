@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Employees Report View</title>
+  <style>
+    :root {
+      --bg: #f4f9ff;
+      --panel: #ffffff;
+      --ink: #0f1b2a;
+      --muted: #5d6b82;
+      --a: #0ea5e9;
+      --b: #22c55e;
+      --c: #f59e0b;
+      --d: #f43f5e;
+      --line: #dbe7ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 450px at 0% -10%, #d7ebff 0%, transparent 60%),
+        radial-gradient(1200px 450px at 100% -10%, #e4ffe9 0%, transparent 60%),
+        var(--bg);
+    }
+    h1 { margin: 0 0 6px; }
+    .muted { color: var(--muted); }
+    .layout {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 20px rgba(10, 30, 70, 0.06);
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      background: linear-gradient(120deg, #0284c7, #2563eb);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+    }
+    .card {
+      border-radius: 12px;
+      padding: 12px;
+      color: #fff;
+    }
+    .card small { opacity: .9; }
+    .card h2 { margin: 6px 0 0; font-size: 1.35rem; }
+    .c1 { background: linear-gradient(140deg, #0891b2, #0ea5e9); }
+    .c2 { background: linear-gradient(140deg, #16a34a, #22c55e); }
+    .c3 { background: linear-gradient(140deg, #d97706, #f59e0b); }
+    .c4 { background: linear-gradient(140deg, #e11d48, #f43f5e); }
+    .level-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      background: #f8fbff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    th {
+      background: #eef5ff;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:hover { background: #f8fbff; }
+    .lv1 { border-left: 5px solid #22c55e; }
+    .lv2 { border-left: 5px solid #0ea5e9; }
+    .lv3 { border-left: 5px solid #f59e0b; }
+    .lv4 { border-left: 5px solid #f43f5e; }
+    .lv5 { border-left: 5px solid #7c3aed; }
+    .grid-scroll {
+      max-height: 62vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <div class="topbar">
+        <div>
+          <h1>Users Database Report</h1>
+          <div id="status" class="muted">Loading latest report...</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <button id="refreshBtn" class="btn">Refresh Report</button>
+        <input id="searchBox" type="search" placeholder="search name or email" style="padding:8px;border:1px solid var(--line);border-radius:8px;" />
+      </div>
+      </div>
+    </section>
+
+    <section class="cards">
+      <article class="card c1"><small>Total Users</small><h2 id="totalUsers">0</h2></article>
+      <article class="card c2"><small>Report Source</small><h2 id="sourceInfo">-</h2></article>
+      <article class="card c3"><small>Report Version</small><h2 id="versionInfo">-</h2></article>
+      <article class="card c4"><small>Last Fetch Time</small><h2 id="fetchTime">-</h2></article>
+    </section>
+
+    <section class="panel">
+      <strong>Level Distribution</strong>
+      <div class="level-wrap" id="levelPills"></div>
+    </section>
+
+    <section class="panel">
+      <div class="grid-scroll">
+        <table id="tbl" aria-live="polite">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Joining Date</th>
+              <th>Record Timing</th>
+              <th>Level</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // use the new `/users/report` endpoint which reads directly from the
+  // PostgreSQL database when available (falls back to the previous seeded
+  // file state when not).  It returns the same report shape as before.
+  const baseUrl = 'http://localhost:3000/users/report';
+    let timer = null;
+
+    document.getElementById('refreshBtn').addEventListener('click', load);
+    document.getElementById('searchBox').addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(load, 250);
+    });
+
+    async function load(){
+      const statusEl = document.getElementById('status');
+      const query = document.getElementById('searchBox').value.trim();
+      const apiUrl = query ? `${baseUrl}?search=${encodeURIComponent(query)}` : baseUrl;
+      try{
+        const res = await fetch(apiUrl, { cache: 'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        const payload = await res.json();
+        const data = payload.users || [];
+        const tbody = document.querySelector('#tbl tbody');
+        tbody.innerHTML = '';
+        for(const r of data){
+          const tr = document.createElement('tr');
+          const levelClass = levelClassName(r.level);
+          tr.className = levelClass;
+          tr.innerHTML = `<td>${r.id}</td><td>${escapeHtml(r.name || r.full_name)}</td><td>${escapeHtml(r.email)}</td><td>${escapeHtml(r.phone || r.mobile_number || '-')}</td><td>${formatDate(r.createdAt || r.joining_date)}</td><td>${formatDateTime(r.record_timing || r.createdAt || r.joining_date)}</td><td>${escapeHtml(r.level || '-')}</td>`;
+          // clicking a row will open the main application focused on that user id
+          tr.style.cursor = 'pointer';
+          tr.title = 'Open user in main app';
+          tr.addEventListener('click', () => {
+            window.open(`index.html?userId=${r.id}`, '_blank');
+          });
+          tbody.appendChild(tr);
+        }
+
+        document.getElementById('totalUsers').textContent = String(payload.total_users ?? data.length);
+        document.getElementById('sourceInfo').textContent = payload.source || 'unknown';
+        document.getElementById('versionInfo').textContent = formatDateTime(payload.report_version);
+        document.getElementById('fetchTime').textContent = formatDateTime(new Date().toISOString());
+        renderLevels(payload.level_counts || {});
+        statusEl.textContent = `Loaded ${data.length} users from ${payload.source || 'source'}.`;
+      }catch(e){
+        statusEl.textContent = 'Unable to load data: ' + e.message;
+      }
+    }
+
+    function renderLevels(levelCounts){
+      const wrap = document.getElementById('levelPills');
+      wrap.innerHTML = '';
+      const entries = Object.entries(levelCounts).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+      if(entries.length === 0){
+        wrap.innerHTML = '<span class="pill">No level data</span>';
+        return;
+      }
+      for(const [level, count] of entries){
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = `${level}: ${count}`;
+        wrap.appendChild(pill);
+      }
+    }
+
+    function levelClassName(level){
+      const n = String(level || '').match(/\d+/);
+      if(!n) return '';
+      return `lv${Math.min(5, Number(n[0]))}`;
+    }
+
+    function formatDateTime(value){
+      if(!value) return '-';
+      const d = new Date(value);
+      if(Number.isNaN(d.getTime())) return escapeHtml(String(value));
+      return d.toLocaleString();
+    }
+
+    function formatDate(value){
+      if(!value) return '-';
+      const d = new Date(value);
+      if(Number.isNaN(d.getTime())) return escapeHtml(String(value));
+      return d.toLocaleDateString();
+    }
+
+    function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    load();
+    timer = setInterval(load, 20000);
+    window.addEventListener('beforeunload', () => { if(timer) clearInterval(timer); });
+  </script>
+</body>
+</html>

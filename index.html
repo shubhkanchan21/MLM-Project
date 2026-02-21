@@ -1,0 +1,2107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Membership Tree | Enterprise Console</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap");
+
+      :root{
+        --bg0:#f7fbf8;
+        --bg1:#eaf6ee;
+        --panel:#ffffff;
+        --panel2:#f4faf6;
+        --text:#0b1a12;
+        --muted:#5e6b63;
+        --border:rgba(10,40,25,.12);
+
+        --accent:#18a85f;
+        --accent2:#0f7f45;
+        --accentSoft:rgba(24,168,95,.14);
+
+        --paid:#18a85f;
+        --unpaid:#e05564;
+        --overdue:#f0a22e;
+        --locked:#9aa7a0;
+
+        --shadow:0 22px 60px rgba(10,40,25,.10);
+        --r10:10px;
+        --r12:12px;
+        --r16:16px;
+        --r18:18px;
+      }
+
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family:"Manrope","Segoe UI",system-ui,-apple-system,sans-serif;
+        color:var(--text);
+        background:
+          radial-gradient(900px 600px at 12% 12%, rgba(24,168,95,.10), transparent 55%),
+          radial-gradient(800px 520px at 88% 20%, rgba(15,127,69,.10), transparent 60%),
+          linear-gradient(180deg,var(--bg0),var(--bg1));
+        overflow:hidden;
+        transition:background .25s ease, color .25s ease;
+      }
+      body.dark{
+        --bg0:#070b14;
+        --bg1:#0b1222;
+        --panel:#0f1930;
+        --panel2:#121f3b;
+        --text:#e9f0ff;
+        --muted:#a7b6d6;
+        --border:rgba(255,255,255,.08);
+        --shadow:0 18px 60px rgba(0,0,0,.55);
+        background:
+          radial-gradient(900px 600px at 12% 12%, rgba(24,168,95,.16), transparent 55%),
+          radial-gradient(800px 520px at 88% 20%, rgba(15,127,69,.16), transparent 60%),
+          linear-gradient(180deg,var(--bg0),var(--bg1));
+      }
+
+      a{color:inherit}
+      button,input,select{font:inherit}
+
+      :focus-visible{
+        outline:2px solid rgba(24,168,95,.55);
+        outline-offset:2px;
+        border-radius:10px;
+      }
+
+      .app{
+        height:100%;
+        display:grid;
+        grid-template-columns: 300px 1fr;
+      }
+
+      .sidebar{
+        border-right:1px solid var(--border);
+        padding:22px 18px;
+        display:flex;
+        flex-direction:column;
+        gap:18px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7)),
+          rgba(255,255,255,.7);
+        backdrop-filter: blur(14px);
+        transition:background .25s ease, border-color .25s ease;
+      }
+      body.dark .sidebar{
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)),
+          rgba(9,14,27,.6);
+      }
+
+      .profileCard{
+        width:100%;
+        border:1px solid var(--border);
+        background:linear-gradient(135deg,#ffffff, #f2fbf5);
+        border-radius:18px;
+        padding:16px;
+        display:grid;
+        gap:8px;
+        box-shadow:var(--shadow);
+      }
+      .profileTitle{font-weight:800;font-size:15px}
+      .profileSub{color:var(--muted);font-size:12px}
+      .profileMeta{
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        font-size:11px;
+        color:var(--muted);
+      }
+      .profilePill{
+        border:1px solid var(--border);
+        padding:4px 8px;
+        border-radius:999px;
+        background:#fff;
+        font-weight:700;
+      }
+
+      .menuGroup{
+        display:grid;
+        gap:10px;
+      }
+      .menuTitle{
+        font-size:12px;
+        letter-spacing:.6px;
+        text-transform:uppercase;
+        color:var(--muted);
+        margin:0 4px;
+      }
+      .menu{
+        display:grid;
+        gap:8px;
+      }
+      .menuBtn{
+        display:flex;align-items:center;justify-content:space-between;
+        border:1px solid transparent;
+        background:#ffffff;
+        color:var(--text);
+        padding:11px 12px;
+        border-radius:14px;
+        cursor:pointer;
+        transition:transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
+        font-weight:700;
+      }
+      .menuBtn:hover{
+        background:var(--accentSoft);
+        border-color:rgba(24,168,95,.28);
+        transform:translateY(-1px);
+      }
+      .menuBtn.active{
+        background:rgba(24,168,95,.16);
+        border-color:rgba(24,168,95,.35);
+        color:#0b1a12;
+      }
+      body.dark .menuBtn.active{color:var(--text)}
+      body.dark .menuBtn{color:var(--muted)}
+      .menuBtn .pill{
+        font-size:11px;
+        padding:3px 8px;
+        border-radius:999px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        color:var(--muted);
+      }
+
+      .sidebarCard{
+        margin-top:auto;
+        border:1px solid var(--border);
+        background:#ffffff;
+        border-radius:18px;
+        padding:14px;
+        display:grid;
+        gap:10px;
+      }
+      .sidebarCard h3{margin:0;font-size:13px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+      .sidebarCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+
+      .btnRow{display:flex;gap:10px;flex-wrap:wrap}
+      .btn{
+        border-radius:14px;
+        padding:10px 12px;
+        border:1px solid transparent;
+        cursor:pointer;
+        font-weight:800;
+        transition:transform .16s ease, opacity .16s ease, background .16s ease, border-color .16s ease;
+      }
+      .btn:hover{transform:translateY(-1px)}
+      .btnPrimary{
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        color:#ffffff;
+      }
+      .btnGhost{
+        background:#ffffff;
+        border-color:var(--border);
+        color:var(--text);
+      }
+      .btnOutline{
+        background:transparent;
+        border-color:rgba(10,40,25,.25);
+        color:var(--text);
+      }
+      .btnDanger{
+        background:rgba(224,85,100,.12);
+        border-color:rgba(224,85,100,.26);
+        color:#812c37;
+      }
+      body.dark .btnPrimary{color:#04151a}
+      body.dark .btnGhost{background:rgba(255,255,255,.08);color:var(--text)}
+      body.dark .btnOutline{border-color:rgba(255,255,255,.28);color:var(--text)}
+      body.dark .btnDanger{color:#ffdbe2}
+
+      .main{
+        padding:24px 26px 22px;
+        display:flex;
+        flex-direction:column;
+        gap:16px;
+        overflow:hidden;
+      }
+
+      .topbar{
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:14px;
+      }
+      .headline h1{margin:0;font-size:26px;letter-spacing:.2px}
+      .headline p{margin:6px 0 0;color:var(--muted);font-size:13px}
+      .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+      .stats{
+        display:grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap:12px;
+      }
+      .stat{
+        border-radius:18px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        padding:14px;
+        box-shadow:var(--shadow);
+        transition:background .25s ease, border-color .25s ease, box-shadow .25s ease;
+      }
+      body.dark .stat{background:rgba(15,25,48,.72)}
+      .statLabel{color:var(--muted);font-size:11px;letter-spacing:1px;text-transform:uppercase}
+      .statValue{margin-top:6px;font-size:20px;font-weight:800}
+
+      .content{
+        display:grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+        gap:14px;
+        overflow:hidden;
+        flex:1;
+        min-height:0;
+      }
+
+      .panel{
+        border-radius:18px;
+        border:1px solid var(--border);
+        background:var(--panel);
+        box-shadow:var(--shadow);
+        display:flex;
+        flex-direction:column;
+        min-height:0;
+        overflow:hidden;
+        transition:background .25s ease, border-color .25s ease, box-shadow .25s ease;
+      }
+      .panelHeader{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        padding:14px 14px 12px;
+        border-bottom:1px solid var(--border);
+        background:linear-gradient(180deg, rgba(24,168,95,.08), rgba(255,255,255,0));
+      }
+      .panelHeader h2{margin:0;font-size:15px;letter-spacing:.2px}
+      .panelHeader .meta{display:flex;gap:8px;align-items:center}
+      .badgeLive{
+        font-size:12px;font-weight:800;
+        color:var(--accent2);
+        background:rgba(24,168,95,.12);
+        border:1px solid rgba(24,168,95,.24);
+        border-radius:999px;
+        padding:3px 10px;
+      }
+
+      .filters{
+        padding:12px 14px;
+        display:grid;
+        grid-template-columns: 1.2fr .8fr .8fr .8fr auto;
+        gap:10px;
+        border-bottom:1px solid var(--border);
+        background:rgba(24,168,95,.04);
+      }
+      body.dark .filters{background:rgba(255,255,255,.02)}
+      .field{display:grid;gap:6px}
+      .field label{color:var(--muted);font-size:11px;letter-spacing:.8px;text-transform:uppercase}
+      .field input,.field select{
+        border-radius:14px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        color:var(--text);
+        padding:10px 12px;
+      }
+      body.dark .field input, body.dark .field select{background:rgba(255,255,255,.04)}
+      .fieldHint{color:var(--muted);font-size:11px}
+
+      .treeArea{
+        position:relative;
+        flex:1;
+        min-height:0;
+        overflow:auto;
+        padding:16px;
+        background:
+          radial-gradient(700px 420px at 18% 12%, rgba(24,168,95,.10), transparent 60%),
+          rgba(255,255,255,.5);
+      }
+      body.dark .treeArea{
+        background:
+          radial-gradient(700px 420px at 18% 12%, rgba(24,168,95,.10), transparent 60%),
+          rgba(5,8,16,.22);
+      }
+      .treeWrap{
+        position:relative;
+        min-width:980px;
+        min-height:640px;
+        border-radius:16px;
+        border:1px dashed rgba(10,40,25,.18);
+        background:rgba(255,255,255,.7);
+        overflow:hidden;
+      }
+      #connections{
+        position:absolute;inset:0;width:100%;height:100%;
+        pointer-events:none;
+        filter: drop-shadow(0 0 6px rgba(10,40,25,.10));
+      }
+      #tree{
+        position:absolute;inset:0;
+      }
+
+      .node{
+        position:absolute;
+        width:86px;height:70px;
+        border-radius:18px;
+        display:grid;
+        place-items:center;
+        padding:8px 10px;
+        text-align:center;
+        border:1px solid rgba(10,40,25,.18);
+        background:linear-gradient(150deg, rgba(255,255,255,.98), rgba(240,250,245,.9));
+        color:var(--text);
+        cursor:pointer;
+        transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease, opacity .16s ease;
+        user-select:none;
+      }
+      .node:hover{
+        transform:translateY(-4px);
+        box-shadow:0 18px 40px rgba(10,40,25,.20);
+      }
+      .nodeTitle{font-weight:900;font-size:12px;line-height:1.05}
+      .nodeSub{margin-top:4px;font-size:10px;color:var(--muted);font-weight:700}
+
+      .node.paid{border-color:rgba(24,168,95,.44); box-shadow:0 16px 34px rgba(24,168,95,.16)}
+      .node.unpaid{border-color:rgba(224,85,100,.44); box-shadow:0 16px 34px rgba(224,85,100,.10)}
+      .node.overdue{border-color:rgba(240,162,46,.44); box-shadow:0 16px 34px rgba(240,162,46,.12)}
+      .node.locked{
+        opacity:.55;
+        cursor:not-allowed;
+        border-color:rgba(154,167,160,.45);
+        box-shadow:none;
+      }
+      .node.selected{
+        outline:3px solid rgba(24,168,95,.35);
+        outline-offset:2px;
+      }
+
+      .cornerTag{
+        position:absolute;
+        top:-8px;right:-8px;
+        border-radius:999px;
+        padding:4px 8px;
+        font-size:10px;
+        font-weight:900;
+        border:1px solid var(--border);
+        background:#ffffff;
+        color:var(--muted);
+      }
+
+      .tableWrap{flex:1;min-height:0;overflow:auto}
+      table{width:100%;border-collapse:collapse;min-width:720px}
+      thead th{
+        position:sticky;top:0;z-index:1;
+        background:var(--panel2);
+        border-bottom:1px solid var(--border);
+        font-size:11px;
+        color:var(--muted);
+        text-transform:uppercase;
+        letter-spacing:.9px;
+        padding:12px 12px;
+        text-align:left;
+      }
+      tbody td{
+        padding:12px 12px;
+        border-bottom:1px solid rgba(10,40,25,.08);
+        font-size:13px;
+      }
+      tbody tr{
+        cursor:pointer;
+        transition:background .12s ease;
+      }
+      tbody tr:hover{background:rgba(24,168,95,.06)}
+      .small{color:var(--muted);font-size:12px}
+
+      .chip{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        border-radius:999px;
+        padding:4px 10px;
+        font-size:11px;
+        font-weight:900;
+        border:1px solid var(--border);
+        background:#ffffff;
+      }
+      .dot{width:8px;height:8px;border-radius:999px;background:var(--locked)}
+      .chip.paid{color:#0b5a33;border-color:rgba(24,168,95,.26);background:rgba(24,168,95,.10)}
+      .chip.paid .dot{background:var(--paid)}
+      .chip.unpaid{color:#832a35;border-color:rgba(224,85,100,.26);background:rgba(224,85,100,.10)}
+      .chip.unpaid .dot{background:var(--unpaid)}
+      .chip.overdue{color:#7d4f09;border-color:rgba(240,162,46,.26);background:rgba(240,162,46,.12)}
+      .chip.overdue .dot{background:var(--overdue)}
+      .chip.locked{color:#53615a;border-color:rgba(154,167,160,.30);background:rgba(154,167,160,.12)}
+      .chip.locked .dot{background:var(--locked)}
+
+      .pagination{
+        display:flex;align-items:center;justify-content:space-between;
+        gap:10px;
+        padding:12px 14px;
+        border-top:1px solid var(--border);
+        background:rgba(24,168,95,.04);
+      }
+      .pageBtns{display:flex;gap:8px}
+
+      .modal{
+        position:fixed;inset:0;
+        display:none;
+        align-items:center;justify-content:center;
+        padding:22px;
+        background:rgba(10,20,15,.35);
+        z-index:50;
+      }
+      body.dark .modal{background:rgba(0,0,0,.55)}
+      .modal.open{display:flex}
+      .modalCard{
+        width:min(680px, 100%);
+        border-radius:18px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        box-shadow:var(--shadow);
+        position:relative;
+        overflow:hidden;
+      }
+      body.dark .modalCard{background:rgba(15,25,48,.95)}
+      .modalTop{
+        padding:16px 16px 12px;
+        border-bottom:1px solid var(--border);
+        display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+      }
+      .modalTop h3{margin:0;font-size:18px}
+      .modalTop p{margin:6px 0 0;color:var(--muted);font-size:13px}
+      .iconBtn{
+        border-radius:14px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        color:var(--text);
+        width:40px;height:40px;
+        cursor:pointer;
+      }
+      .modalBody{
+        padding:14px 16px 16px;
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap:12px;
+      }
+      .kv{
+        border-radius:16px;
+        border:1px solid rgba(10,40,25,.10);
+        background:rgba(24,168,95,.05);
+        padding:12px;
+      }
+      .kv .k{color:var(--muted);font-size:11px;letter-spacing:.9px;text-transform:uppercase}
+      .kv .v{margin-top:6px;font-weight:800}
+      .modalFooter{
+        padding:14px 16px;
+        display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+        border-top:1px solid var(--border);
+        background:rgba(24,168,95,.04);
+      }
+      .modalActions{display:flex;gap:8px;flex-wrap:wrap}
+      .checkboxRow{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+
+      .toast{
+        position:fixed;right:22px;bottom:22px;
+        display:none;
+        padding:12px 14px;
+        border-radius:16px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        box-shadow:var(--shadow);
+        z-index:60;
+      }
+      .toast.show{display:block;animation:toastIn .16s ease}
+      @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+      .view{display:none;flex-direction:column;gap:14px;min-height:0;flex:1}
+      .view.active{display:flex}
+
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+
+      .listCard{
+        border:1px solid var(--border);
+        border-radius:16px;
+        background:#ffffff;
+        box-shadow:var(--shadow);
+        overflow:hidden;
+        display:flex;
+        flex-direction:column;
+        min-height:0;
+      }
+      body.dark .listCard{background:rgba(15,25,48,.72)}
+      .listHeader{
+        padding:12px 14px;
+        border-bottom:1px solid var(--border);
+        font-weight:800;
+        background:rgba(24,168,95,.06);
+      }
+      .listBody{padding:12px 14px;display:grid;gap:10px;overflow:auto}
+      .listRow{
+        border:1px solid var(--border);
+        border-radius:14px;
+        padding:10px 12px;
+        display:grid;
+        gap:4px;
+        background:#ffffff;
+        cursor:pointer;
+      }
+      body.dark .listRow{background:rgba(15,25,48,.65)}
+      .listRow:hover{background:rgba(24,168,95,.06)}
+      .listRowMeta{color:var(--muted);font-size:12px}
+
+      .formGrid{display:grid;gap:12px}
+      .formRow{display:grid;gap:6px}
+      .formRow.rowInline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+      .formRow label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+      .formRow input,.formRow select{
+        border-radius:12px;
+        border:1px solid var(--border);
+        background:#ffffff;
+        padding:10px 12px;
+      }
+      body.dark .formRow input, body.dark .formRow select{background:rgba(255,255,255,.04);color:var(--text)}
+      .readonly{
+        background:rgba(10,40,25,.04);
+        color:var(--muted);
+      }
+      body.dark .readonly{background:rgba(255,255,255,.04)}
+
+      .switch{
+        position:relative;
+        display:inline-flex;
+        width:52px;
+        height:28px;
+        align-items:center;
+      }
+      .switch input{opacity:0;width:0;height:0}
+      .slider{
+        position:absolute;
+        cursor:pointer;
+        inset:0;
+        background:rgba(10,40,25,.10);
+        border:1px solid var(--border);
+        border-radius:999px;
+        transition:.2s ease;
+      }
+      .slider:before{
+        content:"";
+        position:absolute;
+        height:22px;
+        width:22px;
+        left:3px;
+        top:2px;
+        border-radius:999px;
+        background:linear-gradient(135deg,var(--accent),var(--accent2));
+        transition:.2s ease;
+      }
+      .switch input:checked + .slider{
+        background:rgba(24,168,95,.22);
+      }
+      .switch input:checked + .slider:before{
+        transform:translateX(23px);
+      }
+
+      @media (max-width:1200px){
+        .content{grid-template-columns:1fr}
+        .treeWrap{min-width:860px}
+      }
+      @media (max-width:980px){
+        body{overflow:auto}
+        .app{grid-template-columns:1fr}
+        .sidebar{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+        .menu{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .sidebarCard{display:none}
+        .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .filters{grid-template-columns:1fr 1fr}
+        .treeWrap{min-width:760px}
+        .modalBody{grid-template-columns:1fr}
+        .grid2{grid-template-columns:1fr}
+        .grid3{grid-template-columns:1fr}
+      }
+      @media (max-width:520px){
+        .main{padding:18px}
+        .stats{grid-template-columns:1fr}
+        .treeWrap{min-width:680px}
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="profileCard" aria-label="Profile">
+          <div class="profileTitle">You, Aditya Reddy</div>
+          <div class="profileSub">Enterprise Administrator � Membership Tree Console</div>
+          <div class="profileMeta">
+            <span class="profilePill" id="profileStatus">Sync Ready</span>
+            <span class="profilePill" id="profileMembers">0 members</span>
+          </div>
+        </div>
+
+        <div class="menuGroup" aria-label="Enterprise console">
+          <div class="menuTitle">Internship</div>
+          <div class="menu" id="menu">
+            <button class="menuBtn active" data-view="desktop" type="button">Desktop <span class="pill" id="pillDesktop">Live</span></button>
+            <button class="menuBtn" data-view="membership-tree" type="button">Membership Tree <span class="pill" id="pillTree">Tree</span></button>
+            <button class="menuBtn" data-view="members" type="button">Members <span class="pill" id="pillMembers">0</span></button>
+            <button class="menuBtn" data-view="payments" type="button">Payments <span class="pill" id="pillPayments">0</span></button>
+            <button class="menuBtn" data-view="compilation" type="button">Compilation <span class="pill" id="pillCompilation">Rev</span></button>
+            <button class="menuBtn" data-view="settings" type="button">Settings <span class="pill" id="pillSettings">Admin</span></button>
+          </div>
+        </div>
+
+        <div class="sidebarCard" aria-label="Console note">
+          <h3>Admin Control</h3>
+          <p>
+            Payments are executed by admin only. Level unlocks are enforced automatically.
+          </p>
+          <div class="btnRow">
+            <button id="btnSync" class="btn btnPrimary" type="button">Sync Payments</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="headline">
+            <h1 id="viewTitle">Network Overview</h1>
+            <p id="viewSubtitle">Professional member directory + binary tree view, with payment gating and audit-friendly details.</p>
+          </div>
+          <div class="actions" id="viewActions">
+            <span class="pill" id="dbStatusPill">DB: checking...</span>
+            <button id="btnExport" class="btn btnGhost" type="button">Export CSV</button>
+            <button id="btnAdd" class="btn btnPrimary" type="button">Add Member</button>
+          </div>
+        </header>
+
+        <section class="view active" id="view-desktop" aria-label="Desktop view">
+          <section class="stats" aria-label="KPIs">
+            <div class="stat">
+              <div class="statLabel">Total Members</div>
+              <div id="statTotal" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Completed Payments</div>
+              <div id="statPaid" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Locked</div>
+              <div id="statLocked" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Depth</div>
+              <div id="statDepth" class="statValue">0</div>
+            </div>
+          </section>
+
+          <section class="content" aria-label="Main content">
+            <section class="panel" aria-label="Membership tree panel">
+              <div class="panelHeader">
+                <h2>Membership Tree</h2>
+                <div class="meta">
+                  <span class="badgeLive" id="treeStatus">Synced</span>
+                  <span class="pill" id="treeHint">Admin Controlled</span>
+                </div>
+              </div>
+
+              <div class="filters" aria-label="Tree controls">
+                <div class="field">
+                  <label for="q">Search</label>
+                  <input id="q" autocomplete="off" aria-describedby="qHint" />
+                  <div class="fieldHint" id="qHint">Filter by name, email, phone, or user ID.</div>
+                </div>
+                <div class="field">
+                  <label for="fPayment">Payment</label>
+                  <select id="fPayment">
+                    <option value="all">All</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Not Completed">Not Completed</option>
+                    <option value="Overdue">Overdue</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fReach">Reachability</label>
+                  <select id="fReach">
+                    <option value="all">All</option>
+                    <option value="reachable">Reachable</option>
+                    <option value="locked">Locked</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fLevel">Level</label>
+                  <select id="fLevel">
+                    <option value="all">All</option>
+                  </select>
+                </div>
+                <div class="field" style="align-self:end">
+                  <button id="btnReset" class="btn btnOutline" type="button">Reset</button>
+                </div>
+              </div>
+
+              <div class="treeArea">
+                <div class="treeWrap" id="treeWrap" role="application" aria-label="Tree canvas">
+                  <svg id="connections" aria-hidden="true"></svg>
+                  <div id="tree"></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel" aria-label="Member directory panel">
+              <div class="panelHeader">
+                <h2>Member Directory</h2>
+                <div class="meta">
+                  <span class="pill" id="dirCount">0 shown</span>
+                </div>
+              </div>
+
+              <div class="tableWrap" role="region" aria-label="Directory results">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Level</th>
+                      <th>Payment</th>
+                      <th>Reach</th>
+                      <th>Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rows"></tbody>
+                </table>
+              </div>
+
+              <div class="pagination" aria-label="Pagination">
+                <div id="pageInfo" class="small">Page 1</div>
+                <div class="pageBtns">
+                  <button id="btnPrev" class="btn btnOutline" type="button">Prev</button>
+                  <button id="btnNext" class="btn btnOutline" type="button">Next</button>
+                </div>
+              </div>
+            </section>
+          </section>
+        </section>
+        <section class="view" id="view-membership-tree" aria-label="Membership tree view">
+          <section class="panel">
+            <div class="panelHeader">
+              <h2>Membership Tree - Focus View</h2>
+              <div class="meta">
+                <span class="badgeLive" id="treeStatusAlt">Synced</span>
+                <span class="pill">Level Unlocks Enforced</span>
+              </div>
+            </div>
+            <div class="treeArea">
+              <div class="treeWrap" id="treeWrapAlt" role="application" aria-label="Tree canvas">
+                <svg id="connectionsAlt" aria-hidden="true"></svg>
+                <div id="treeAlt"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-members" aria-label="Members view">
+          <section class="stats" aria-label="Members summary">
+            <div class="stat">
+              <div class="statLabel">Total Members</div>
+              <div id="membersTotal" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Active</div>
+              <div id="membersActive" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Inactive</div>
+              <div id="membersInactive" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Levels</div>
+              <div id="membersLevels" class="statValue">0</div>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="listCard">
+              <div class="listHeader">Level-wise Member Count</div>
+              <div id="levelCounts" class="listBody"></div>
+            </div>
+            <div class="listCard">
+              <div class="listHeader">Members</div>
+              <div id="memberList" class="listBody"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-payments" aria-label="Payments view">
+          <section class="panel">
+            <div class="panelHeader">
+              <h2>Payments - Admin Control</h2>
+              <div class="meta">
+                <span class="badgeLive" id="paymentsStatus">Admin Only</span>
+                <span class="pill" id="paymentsSummary">0 pending</span>
+              </div>
+            </div>
+
+            <div class="filters" aria-label="Payment filters">
+              <div class="field">
+                <label for="pLevel">Level</label>
+                <select id="pLevel">
+                  <option value="all">All</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pStatus">Status</label>
+                <select id="pStatus">
+                  <option value="all">All</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Not Completed">Not Completed</option>
+                  <option value="Overdue">Overdue</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="pDate">Joined Date</label>
+                <input id="pDate" type="date" />
+              </div>
+              <div class="field" style="align-self:end">
+                <button id="btnPaymentsReset" class="btn btnOutline" type="button">Reset</button>
+              </div>
+            </div>
+
+            <div class="grid2" style="padding:14px;flex:1;min-height:0">
+              <div class="listCard" style="min-height:0">
+                <div class="listHeader">Completed Payments</div>
+                <div id="paymentsCompleted" class="listBody"></div>
+              </div>
+              <div class="listCard" style="min-height:0">
+                <div class="listHeader">Not Completed Payments</div>
+                <div id="paymentsPending" class="listBody"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-compilation" aria-label="Compilation view">
+          <section class="stats" aria-label="Compilation summary">
+            <div class="stat">
+              <div class="statLabel">Total Revenue</div>
+              <div id="compRevenue" class="statValue">0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Completion %</div>
+              <div id="compCompletion" class="statValue">0%</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Active vs Inactive</div>
+              <div id="compActive" class="statValue">0 / 0</div>
+            </div>
+            <div class="stat">
+              <div class="statLabel">Tree Depth</div>
+              <div id="compDepth" class="statValue">0</div>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="listCard">
+              <div class="listHeader">Level-wise Revenue</div>
+              <div id="levelRevenue" class="listBody"></div>
+            </div>
+            <div class="listCard">
+              <div class="listHeader">Depth Analysis</div>
+              <div id="depthAnalysis" class="listBody"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-settings" aria-label="Settings view">
+          <section class="grid2">
+            <div class="panel" aria-label="Admin profile settings">
+              <div class="panelHeader">
+                <h2>Admin Profile Settings</h2>
+              </div>
+              <div class="modalBody" style="grid-template-columns:1fr">
+                <div class="formGrid">
+                  <div class="formRow">
+                    <label for="adminName">Full Name</label>
+                    <input id="adminName" />
+                  </div>
+                  <div class="formRow">
+                    <label for="adminEmail">Email</label>
+                    <input id="adminEmail" />
+                  </div>
+                  <div class="formRow">
+                    <label for="adminPhone">Mobile</label>
+                    <input id="adminPhone" />
+                  </div>
+                  <div class="btnRow">
+                    <button id="btnSaveAdmin" class="btn btnPrimary" type="button">Save Profile</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" aria-label="User account linking">
+              <div class="panelHeader">
+                <h2>User Account Linking</h2>
+              </div>
+              <div class="modalBody" style="grid-template-columns:1fr">
+                <div class="formGrid">
+                  <div class="formRow">
+                    <label for="linkUserId">Internal User ID</label>
+                    <input id="linkUserId" />
+                  </div>
+                  <div class="formRow">
+                    <label for="linkExternal">External Account ID</label>
+                    <input id="linkExternal" />
+                  </div>
+                  <div class="btnRow">
+                    <button id="btnLinkAccount" class="btn btnGhost" type="button">Link Account</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="grid2">
+            <div class="panel" aria-label="System configuration">
+              <div class="panelHeader">
+                <h2>System Configuration</h2>
+              </div>
+              <div class="modalBody" style="grid-template-columns:1fr">
+                <div class="formGrid">
+                  <div class="formRow">
+                    <label>Payment Amount per Level</label>
+                    <input id="cfgAmount" class="readonly" readonly />
+                  </div>
+                  <div class="formRow">
+                    <label>Max Levels</label>
+                    <input id="cfgLevels" class="readonly" readonly />
+                  </div>
+                  <div class="formRow">
+                    <label>Level Unlock Mode</label>
+                    <input id="cfgUnlock" class="readonly" readonly />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" aria-label="Appearance settings">
+              <div class="panelHeader">
+                <h2>Appearance</h2>
+              </div>
+              <div class="modalBody" style="grid-template-columns:1fr">
+                <div class="formGrid">
+                  <div class="formRow rowInline">
+                    <label for="darkToggle">Dark Mode</label>
+                    <label class="switch">
+                      <input id="darkToggle" type="checkbox" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" aria-label="Role permissions">
+              <div class="panelHeader">
+                <h2>Role Permissions</h2>
+              </div>
+              <div class="modalBody" style="grid-template-columns:1fr">
+                <div class="formGrid" id="rolePermissions"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-label="Member details">
+      <div class="modalCard" role="document" aria-live="polite">
+        <div class="modalTop">
+          <div>
+            <h3 id="mTitle">Member</h3>
+            <p id="mSub">Details</p>
+          </div>
+          <button id="mClose" class="iconBtn" type="button" aria-label="Close dialog">�</button>
+        </div>
+
+        <div id="mBody" class="modalBody"></div>
+
+        <div class="modalFooter">
+          <div class="checkboxRow">
+            <input id="mTerms" type="checkbox" disabled />
+            <label for="mTerms">Agreement accepted</label>
+          </div>
+          <div class="modalActions">
+            <button id="mMarkPaid" class="btn btnPrimary" type="button">Mark Completed</button>
+            <button id="mReverse" class="btn btnDanger" type="button">Reverse Payment</button>
+            <button id="mClose2" class="btn btnOutline" type="button">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="addModal" class="modal" aria-hidden="true" role="dialog" aria-label="Add member">
+      <div class="modalCard" role="document">
+        <div class="modalTop">
+          <div>
+            <h3>Add Member</h3>
+            <p>Create a new member record and place under an existing parent.</p>
+          </div>
+          <button id="addClose" class="iconBtn" type="button" aria-label="Close dialog">�</button>
+        </div>
+        <div class="modalBody" style="grid-template-columns:1fr">
+          <div class="formGrid">
+            <div class="formRow">
+              <label for="addName">Full Name</label>
+              <input id="addName" />
+            </div>
+            <div class="formRow">
+              <label for="addEmail">Email</label>
+              <input id="addEmail" />
+            </div>
+            <div class="formRow">
+              <label for="addPhone">Mobile</label>
+              <input id="addPhone" />
+            </div>
+            <div class="formRow">
+              <label for="addParent">Parent ID</label>
+              <input id="addParent" />
+            </div>
+            <div class="formRow">
+              <label for="addJoined">Joined Date</label>
+              <input id="addJoined" type="date" />
+            </div>
+          </div>
+        </div>
+        <div class="modalFooter">
+          <div class="small">New members default to Not Completed payment.</div>
+          <div class="modalActions">
+            <button id="btnCreateMember" class="btn btnPrimary" type="button">Create Member</button>
+            <button id="addClose2" class="btn btnOutline" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "";
+      const MM_TO_PX = 3.7795275591;
+
+      const CONFIG = {
+        maxLevels: 6,
+        baseGap: 140,
+        levelGap: 120,
+        extraGapPerLevelMm: 0.1,
+        amountByLevel: [100,120,150,180,220,260],
+        adminRole: "Enterprise Admin",
+        unlockMode: "Full-level completion"
+      };
+
+      const state = {
+        members: [],
+        admin: {
+          name: "Aditya Reddy",
+          email: "aditya.reddy@enterprise.example",
+          phone: "+1-202-555-0142"
+        },
+        accountLinks: [],
+        view: "desktop",
+        page: 1,
+        pageSize: 12,
+        selectedId: null,
+        syncing: false,
+        theme: "light",
+        filters: {
+          query: "",
+          payment: "all",
+          reach: "all",
+          level: "all"
+        },
+        paymentFilters: {
+          level: "all",
+          status: "all",
+          date: ""
+        }
+      };
+
+      const subscribers = [];
+      function subscribe(listener){
+        subscribers.push(listener);
+        return () => {
+          const idx = subscribers.indexOf(listener);
+          if (idx >= 0) subscribers.splice(idx, 1);
+        };
+      }
+      function notify(){
+        for (const fn of subscribers) fn(state);
+      }
+      function setState(patch){
+        Object.assign(state, patch);
+        notify();
+      }
+      function updateMembers(updater){
+        state.members = updater(state.members);
+        notify();
+      }
+      function updatePaymentStatus(userId, status){
+        updateMembers(members => members.map(m => {
+          if (m.id !== userId) return m;
+          const normalized = m.id === 1 ? "Completed" : status;
+          const paidAmount = normalized === "Completed" ? CONFIG.amountByLevel[m.level] : 0;
+          return { ...m, paymentStatus: normalized, paidAmount };
+        }));
+        if (state.selectedId === userId && modal.classList.contains("open")) {
+          openNodeDetailsPopup(userId);
+        }
+      }
+
+      const THEME_KEY = "membership-theme";
+      function applyTheme(theme){
+        const next = theme === "dark" ? "dark" : "light";
+        state.theme = next;
+        document.body.classList.toggle("dark", next === "dark");
+        localStorage.setItem(THEME_KEY, next);
+      }
+      function initTheme(){
+        const saved = localStorage.getItem(THEME_KEY);
+        applyTheme(saved || state.theme);
+      }
+
+      function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296}}
+      let rand = mulberry32(1337);
+
+      const FIRST_NAMES = ["Aditya","Aarav","Anika","Dev","Isha","Kabir","Maya","Nina","Rohan","Sanya","Tara","Veer","Yash","Zara","Riya","Kiran","Neel","Ovi","Pari","Arjun"];
+      const LAST_NAMES = ["Reddy","Patel","Singh","Sharma","Iyer","Khan","Das","Mehta","Gupta","Nair","Kapoor","Bhat","Kulkarni","Joshi","Verma","Rao","Shetty","Malhotra"];
+
+      function generateName(idx){
+        const first = FIRST_NAMES[idx % FIRST_NAMES.length];
+        const last = LAST_NAMES[(idx * 7) % LAST_NAMES.length];
+        return `${first} ${last}`;
+      }
+
+      function buildBinaryMembers(levels){
+        const total = (1 << levels) - 1;
+        const members = Array.from({ length: total }, (_, idx) => {
+          const level = Math.floor(Math.log2(idx + 1));
+          const id = idx + 1;
+          const parentId = idx === 0 ? null : Math.floor((idx - 1) / 2) + 1;
+          const joinedAt = new Date(Date.now() - id * 86400000).toISOString().split("T")[0];
+          const paymentCompleted = idx === 0 ? true : rand() > 0.58;
+          const overdue = !paymentCompleted && (id % 9 === 0);
+
+          return {
+            id,
+            parentId,
+            level,
+            name: idx === 0 ? "Aditya Reddy" : generateName(idx),
+            email: `member${id}@enterprise.example`,
+            phone: `+1-202-555-${String(1000 + (id % 900)).slice(-4)}`,
+            joinedAt,
+            status: id % 6 === 0 ? "Inactive" : "Active",
+            paymentStatus: paymentCompleted ? "Completed" : (overdue ? "Overdue" : "Not Completed"),
+            paidAmount: paymentCompleted ? CONFIG.amountByLevel[level] : 0,
+            parentIds: parentId ? [parentId] : [],
+            childrenIds: [],
+            agreementAccepted: true,
+            paymentTriggeredAt: null
+          };
+        });
+
+        for (const m of members) {
+          const leftId = m.id * 2;
+          const rightId = m.id * 2 + 1;
+          if (leftId <= total) m.childrenIds.push(leftId);
+          if (rightId <= total) m.childrenIds.push(rightId);
+        }
+
+        return members;
+      }
+
+      const api = {
+        async syncPayments(){
+          state.syncing = true;
+          notify();
+          let synced = 0;
+          await Promise.all(state.members.map(async (m) => {
+            try {
+              const res = await fetch(`${API_BASE}/payment/${m.id}`);
+              if (!res.ok) return;
+              const data = await res.json();
+              if (!data || !data.status) return;
+              const normalized = data.status === "paid" ? "Completed" : "Not Completed";
+              updatePaymentStatus(m.id, normalized);
+              synced++;
+            } catch {
+            }
+          }));
+          state.syncing = false;
+          notify();
+          return synced;
+        },
+        async markPaymentCompleted(id){
+          updatePaymentStatus(id, "Completed");
+          return true;
+        },
+        async reversePayment(id){
+          updatePaymentStatus(id, "Not Completed");
+          return true;
+        },
+        async createMember(payload){
+          updateMembers(members => {
+            const nextId = members.length + 1;
+            const level = payload.parentId ? Math.floor(Math.log2(payload.parentId)) + 1 : 0;
+            const newMember = {
+              id: nextId,
+              parentId: payload.parentId || null,
+              level,
+              name: payload.name,
+              email: payload.email,
+              phone: payload.phone,
+              joinedAt: payload.joinedAt,
+              status: "Active",
+              paymentStatus: "Not Completed",
+              paidAmount: 0,
+              parentIds: payload.parentId ? [payload.parentId] : [],
+              childrenIds: [],
+              agreementAccepted: true,
+              paymentTriggeredAt: null
+            };
+
+            const updated = [...members, newMember];
+            const parent = updated.find(m => m.id === payload.parentId);
+            if (parent && parent.childrenIds.length < 2) {
+              parent.childrenIds.push(nextId);
+            }
+            return updated;
+          });
+          return true;
+        },
+        async saveAdminProfile(profile){
+          state.admin = { ...state.admin, ...profile };
+          notify();
+          return true;
+        },
+        async linkAccount(link){
+          state.accountLinks.push(link);
+          notify();
+          return true;
+        }
+      };
+
+      function ancestorChain(member){
+        const chain = [];
+        let current = member;
+        while (current && current.parentId != null) {
+          const parent = state.members.find(m => m.id === current.parentId);
+          if (!parent) break;
+          chain.push(parent);
+          current = parent;
+        }
+        return chain;
+      }
+
+      function levelUnlocked(level){
+        if (level === 0) return true;
+        const previousLevels = state.members.filter(m => m.level < level);
+        return previousLevels.every(m => m.paymentStatus === "Completed");
+      }
+
+      function isReachable(member){
+        if (!levelUnlocked(member.level)) return false;
+        if (member.id === 1) return true;
+        const chain = ancestorChain(member);
+        return chain.every(m => m.paymentStatus === "Completed");
+      }
+
+      function paymentClass(member){
+        if (!isReachable(member)) return "locked";
+        const status = member.paymentStatus;
+        if (status === "Completed") return "paid";
+        if (status === "Overdue") return "overdue";
+        return "unpaid";
+      }
+
+      function matchesFilters(member){
+        const query = state.filters.query.trim().toLowerCase();
+        const paymentFilter = state.filters.payment;
+        const reachFilter = state.filters.reach;
+        const levelFilter = state.filters.level;
+
+        const reach = isReachable(member);
+        const reachOk =
+          reachFilter === "all" ||
+          (reachFilter === "reachable" && reach) ||
+          (reachFilter === "locked" && !reach);
+
+        const paymentOk = paymentFilter === "all" || member.paymentStatus === paymentFilter;
+        const levelOk = levelFilter === "all" || member.level === Number(levelFilter);
+
+        const queryOk =
+          !query ||
+          member.name.toLowerCase().includes(query) ||
+          member.email.toLowerCase().includes(query) ||
+          member.phone.toLowerCase().includes(query) ||
+          String(member.id).includes(query);
+
+        return reachOk && paymentOk && levelOk && queryOk;
+      }
+
+      function updateStats(){
+        const total = state.members.length;
+        const paid = state.members.filter(m => m.paymentStatus === "Completed").length;
+        const locked = state.members.filter(m => !isReachable(m)).length;
+        const depth = Math.max(...state.members.map(m => m.level));
+
+        statTotal.textContent = total;
+        statPaid.textContent = paid;
+        statLocked.textContent = locked;
+        statDepth.textContent = depth;
+        profileMembers.textContent = `${total} members`;
+        pillMembers.textContent = `${total}`;
+      }
+
+      function populateLevelFilters(){
+        const max = Math.max(...state.members.map(m => m.level));
+        fLevel.innerHTML = '<option value="all">All</option>';
+        pLevel.innerHTML = '<option value="all">All</option>';
+        for (let lvl = 0; lvl <= max; lvl++) {
+          const opt = document.createElement("option");
+          opt.value = String(lvl);
+          opt.textContent = `Level ${lvl}`;
+          fLevel.appendChild(opt.cloneNode(true));
+          pLevel.appendChild(opt);
+        }
+      }
+
+      function layoutTree(treeEl, svgEl, wrapEl){
+        treeEl.innerHTML = "";
+        svgEl.innerHTML = "";
+
+        const nodesByLevel = new Map();
+        for (const m of state.members) {
+          if (!nodesByLevel.has(m.level)) nodesByLevel.set(m.level, []);
+          nodesByLevel.get(m.level).push(m);
+        }
+
+        const levels = Array.from(nodesByLevel.keys()).sort((a,b) => a-b);
+        const maxLevel = levels.length ? Math.max(...levels) : 0;
+        const nodeWidth = 86;
+        const nodeHeight = 70;
+        const extraGapPx = CONFIG.extraGapPerLevelMm * MM_TO_PX;
+
+        const levelHeights = maxLevel + 1;
+        const height = Math.max(640, 80 + (levelHeights - 1) * CONFIG.levelGap + nodeHeight);
+
+        let width = 980;
+        const levelLayouts = new Map();
+        for (const level of levels) {
+          const items = nodesByLevel.get(level).sort((a,b) => a.id - b.id);
+          const gap = CONFIG.baseGap + level * extraGapPx;
+          const levelWidth = (items.length - 1) * gap + nodeWidth;
+          levelLayouts.set(level, { items, gap, levelWidth });
+          width = Math.max(width, levelWidth + 80);
+        }
+
+        wrapEl.style.minWidth = `${width}px`;
+        wrapEl.style.minHeight = `${height}px`;
+
+        const positions = new Map();
+        for (const level of levels) {
+          const { items, gap, levelWidth } = levelLayouts.get(level);
+          const startX = (width - levelWidth) / 2 + nodeWidth / 2;
+          const y = 50 + level * CONFIG.levelGap;
+          items.forEach((member, index) => {
+            const x = startX + index * gap;
+            positions.set(member.id, { x, y });
+          });
+        }
+
+        for (const member of state.members) {
+          if (member.parentId == null) continue;
+          const a = positions.get(member.parentId);
+          const b = positions.get(member.id);
+          if (!a || !b) continue;
+
+          const visible = isReachable(member);
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", a.x);
+          line.setAttribute("y1", a.y);
+          line.setAttribute("x2", b.x);
+          line.setAttribute("y2", b.y);
+          line.setAttribute("stroke", visible ? "rgba(10,40,25,.35)" : "rgba(154,167,160,.30)");
+          line.setAttribute("stroke-width", visible ? "2" : "1.4");
+          line.setAttribute("stroke-linecap", "round");
+          svgEl.appendChild(line);
+        }
+
+        const filteredIds = new Set(state.members.filter(matchesFilters).map(m => m.id));
+        for (const member of state.members) {
+          const pos = positions.get(member.id);
+          if (!pos) continue;
+
+          const el = document.createElement("button");
+          el.type = "button";
+          el.className = `node ${paymentClass(member)}${state.selectedId === member.id ? " selected" : ""}`;
+          el.style.left = `${pos.x - nodeWidth / 2}px`;
+          el.style.top = `${pos.y - nodeHeight / 2}px`;
+          el.dataset.id = String(member.id);
+
+          const reach = isReachable(member);
+          const canInteract = reach || member.id === 1;
+
+          const matches = filteredIds.has(member.id);
+          if (!matches) {
+            el.style.opacity = "0.40";
+          }
+
+          el.disabled = !canInteract && member.id !== 1;
+          el.setAttribute("aria-label", `${member.name}, ${member.paymentStatus}, level ${member.level}${reach ? "" : ", locked"}`);
+
+          el.innerHTML = `
+            <div class="nodeTitle">${member.id === 1 ? "HEAD" : ("M" + member.id)}</div>
+            <div class="nodeSub">L${member.level}</div>
+            <span class="cornerTag">${reach ? member.paymentStatus : "Locked"}</span>
+          `;
+
+          el.addEventListener("click", () => {
+            openNodeDetailsPopup(member.id);
+          });
+
+          treeEl.appendChild(el);
+        }
+
+        centerTree(wrapEl, width, height);
+      }
+
+      function centerTree(wrapEl, width, height){
+        const area = wrapEl.parentElement;
+        if (!area) return;
+        window.requestAnimationFrame(() => {
+          const x = Math.max(0, (width - area.clientWidth) / 2);
+          const y = Math.max(0, (height - area.clientHeight) / 2);
+          area.scrollLeft = x;
+          area.scrollTop = y;
+        });
+      }
+
+      function chipHtml(member){
+        const reach = isReachable(member);
+        const reachChip = reach
+          ? `<span class="chip"><span class="dot" style="background:var(--paid)"></span>Reachable</span>`
+          : `<span class="chip locked"><span class="dot"></span>Locked</span>`;
+
+        const p = reach ? member.paymentStatus : "Locked";
+        const cls = reach ? paymentClass(member) : "locked";
+        const payChip = `<span class="chip ${cls}"><span class="dot"></span>${p}</span>`;
+
+        return { reachChip, payChip };
+      }
+
+      function renderDirectory(){
+        rows.innerHTML = "";
+
+        const filtered = state.members.filter(matchesFilters);
+        dirCount.textContent = `${filtered.length} shown`;
+
+        const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
+        state.page = Math.max(1, Math.min(state.page, totalPages));
+
+        const start = (state.page - 1) * state.pageSize;
+        const pageItems = filtered.slice(start, start + state.pageSize);
+
+        for (const member of pageItems) {
+          const { reachChip, payChip } = chipHtml(member);
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>
+              <div style="font-weight:900">${member.name}</div>
+              <div class="small">${member.email}</div>
+            </td>
+            <td>Level ${member.level}</td>
+            <td>${payChip}</td>
+            <td>${reachChip}</td>
+            <td>${member.joinedAt}</td>
+          `;
+          tr.addEventListener("click", () => openNodeDetailsPopup(member.id));
+          rows.appendChild(tr);
+        }
+
+        pageInfo.textContent = `Page ${state.page} of ${Math.max(1, totalPages)}`;
+        btnPrev.disabled = state.page === 1;
+        btnNext.disabled = state.page === totalPages;
+      }
+
+      function renderMembersView(){
+        const total = state.members.length;
+        const active = state.members.filter(m => m.status === "Active").length;
+        const inactive = total - active;
+        const levels = Math.max(...state.members.map(m => m.level)) + 1;
+
+        membersTotal.textContent = total;
+        membersActive.textContent = active;
+        membersInactive.textContent = inactive;
+        membersLevels.textContent = levels;
+
+        const levelMap = new Map();
+        for (const m of state.members) {
+          levelMap.set(m.level, (levelMap.get(m.level) || 0) + 1);
+        }
+        levelCounts.innerHTML = "";
+        Array.from(levelMap.entries()).sort((a,b)=>a[0]-b[0]).forEach(([level,count]) => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `<div style="font-weight:800">Level ${level}</div><div class="listRowMeta">${count} members</div>`;
+          row.addEventListener("click", () => {
+            state.filters.level = String(level);
+            fLevel.value = String(level);
+            setState({ view: "desktop" });
+            openNodeDetailsPopup(state.members.find(m => m.level === level)?.id || 1);
+          });
+          levelCounts.appendChild(row);
+        });
+
+        memberList.innerHTML = "";
+        state.members.forEach((member) => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `
+            <div style="font-weight:800">${member.name}</div>
+            <div class="listRowMeta">ID ${member.id} � Level ${member.level} � ${member.paymentStatus}</div>
+          `;
+          row.addEventListener("click", () => {
+            highlightNode(member.id);
+            openNodeDetailsPopup(member.id);
+          });
+          memberList.appendChild(row);
+        });
+      }
+
+      function filterPayments(member){
+        const levelOk = state.paymentFilters.level === "all" || member.level === Number(state.paymentFilters.level);
+        const statusOk = state.paymentFilters.status === "all" || member.paymentStatus === state.paymentFilters.status;
+        const dateOk = !state.paymentFilters.date || member.joinedAt === state.paymentFilters.date;
+        return levelOk && statusOk && dateOk;
+      }
+
+      function renderPaymentsView(){
+        const completed = state.members.filter(m => m.paymentStatus === "Completed" && filterPayments(m));
+        const pending = state.members.filter(m => m.paymentStatus !== "Completed" && filterPayments(m));
+
+        paymentsSummary.textContent = `${pending.length} pending`;
+        pillPayments.textContent = `${pending.length}`;
+
+        paymentsCompleted.innerHTML = "";
+        completed.forEach(member => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `
+            <div style="font-weight:800">${member.name}</div>
+            <div class="listRowMeta">ID ${member.id} � Level ${member.level} � Paid ${member.paidAmount}</div>
+          `;
+          row.addEventListener("click", () => openNodeDetailsPopup(member.id));
+          paymentsCompleted.appendChild(row);
+        });
+
+        paymentsPending.innerHTML = "";
+        pending.forEach(member => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML =
+            '<div style="font-weight:800">' + member.name + '</div>' +
+            '<div class="listRowMeta">ID ' + member.id + ' - Level ' + member.level + ' - ' + member.paymentStatus + '</div>';
+          row.addEventListener("click", () => openNodeDetailsPopup(member.id));
+          paymentsPending.appendChild(row);
+        });
+      }
+
+      function renderCompilation(){
+        const totalRevenue = state.members.reduce((sum,m)=>sum + m.paidAmount,0);
+        const completed = state.members.filter(m => m.paymentStatus === "Completed").length;
+        const completionPct = state.members.length ? Math.round((completed / state.members.length) * 100) : 0;
+        const active = state.members.filter(m => m.status === "Active").length;
+        const inactive = state.members.length - active;
+        const depth = Math.max(...state.members.map(m => m.level));
+
+        compRevenue.textContent = `$${totalRevenue.toLocaleString()}`;
+        compCompletion.textContent = `${completionPct}%`;
+        compActive.textContent = `${active} / ${inactive}`;
+        compDepth.textContent = depth;
+
+        const levelRevenueMap = new Map();
+        for (const m of state.members) {
+          levelRevenueMap.set(m.level, (levelRevenueMap.get(m.level) || 0) + m.paidAmount);
+        }
+        levelRevenue.innerHTML = "";
+        Array.from(levelRevenueMap.entries()).sort((a,b)=>a[0]-b[0]).forEach(([level, revenue]) => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `<div style="font-weight:800">Level ${level}</div><div class="listRowMeta">$${revenue.toLocaleString()} revenue</div>`;
+          levelRevenue.appendChild(row);
+        });
+
+        depthAnalysis.innerHTML = "";
+        const levelCounts = new Map();
+        for (const m of state.members) {
+          levelCounts.set(m.level, (levelCounts.get(m.level) || 0) + 1);
+        }
+        Array.from(levelCounts.entries()).sort((a,b)=>a[0]-b[0]).forEach(([level, count]) => {
+          const unlocked = levelUnlocked(level) ? "Unlocked" : "Locked";
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `<div style="font-weight:800">Level ${level}</div><div class="listRowMeta">${count} members � ${unlocked}</div>`;
+          depthAnalysis.appendChild(row);
+        });
+      }
+
+      function renderSettings(){
+        adminName.value = state.admin.name;
+        adminEmail.value = state.admin.email;
+        adminPhone.value = state.admin.phone;
+
+        cfgAmount.value = CONFIG.amountByLevel.map((v,i)=>`L${i}:$${v}`).join(" | ");
+        cfgLevels.value = String(CONFIG.maxLevels);
+        cfgUnlock.value = CONFIG.unlockMode;
+        if (darkToggle) darkToggle.checked = state.theme === "dark";
+
+        rolePermissions.innerHTML = "";
+        const roles = [
+          { role: "Enterprise Admin", permissions: ["Execute payments", "Override locks", "Edit profiles", "Export data"] },
+          { role: "Auditor", permissions: ["Read-only", "Export reports"] },
+          { role: "Support", permissions: ["View members", "Trigger payment"] }
+        ];
+        roles.forEach(r => {
+          const row = document.createElement("div");
+          row.className = "listRow";
+          row.innerHTML = `<div style="font-weight:800">${r.role}</div><div class="listRowMeta">${r.permissions.join(", ")}</div>`;
+          rolePermissions.appendChild(row);
+        });
+      }
+
+      function toastMsg(msg){
+        toast.textContent = msg;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      let modalTimer = null;
+      function openNodeDetailsPopup(memberId){
+        const member = state.members.find(m => m.id === memberId);
+        if (!member) return;
+        state.selectedId = memberId;
+
+        const reach = isReachable(member);
+        const lockedNote = reach ? "Reachable" : "Locked by unpaid ancestor or locked level";
+
+        mTitle.textContent = member.name;
+        mSub.textContent = `ID ${member.id} � Level ${member.level} � ${lockedNote}`;
+
+        mBody.innerHTML = `
+          <div class="kv"><div class="k">Email</div><div class="v">${member.email}</div></div>
+          <div class="kv"><div class="k">Mobile</div><div class="v">${member.phone}</div></div>
+          <div class="kv"><div class="k">Joined Date</div><div class="v">${member.joinedAt}</div></div>
+          <div class="kv"><div class="k">Total Amount Paid</div><div class="v">$${member.paidAmount}</div></div>
+          <div class="kv"><div class="k">Payment Status</div><div class="v">${member.paymentStatus}</div></div>
+          <div class="kv"><div class="k">Parent ID</div><div class="v">${member.parentId ?? "-"}</div></div>
+        `;
+
+        mTerms.checked = member.agreementAccepted === true;
+        const canAdminAction = member.id === 1 || isReachable(member);
+        if (mMarkPaid) mMarkPaid.disabled = !canAdminAction;
+        if (mReverse) mReverse.disabled = member.paymentStatus !== "Completed";
+
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        mClose.focus();
+
+        if (modalTimer) window.clearTimeout(modalTimer);
+        modalTimer = window.setTimeout(closeModal, 60000);
+
+        highlightNode(member.id);
+      }
+
+      function closeModal(){
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+        state.selectedId = null;
+        if (modalTimer) window.clearTimeout(modalTimer);
+        highlightNode(null);
+      }
+
+      function highlightNode(id){
+        state.selectedId = id;
+        renderTrees();
+      }
+
+      async function markPaymentCompleted(id){
+        await api.markPaymentCompleted(id);
+        toastMsg("Payment marked completed.");
+      }
+
+      async function reversePayment(id){
+        await api.reversePayment(id);
+        toastMsg("Payment reversed.");
+      }
+
+      function exportCsv(){
+        const cols = ["id","name","email","phone","level","status","paymentStatus","paidAmount","parentId","joinedAt","childrenIds"];
+        const lines = [cols.join(",")];
+        for (const m of state.members) {
+          const row = cols.map(k => {
+            const v = m[k] == null ? "" : Array.isArray(m[k]) ? m[k].join("|") : String(m[k]);
+            return `"${v.replaceAll('"','""')}"`;
+          });
+          lines.push(row.join(","));
+        }
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "members.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toastMsg("Exported members.csv");
+      }
+
+      function renderTrees(){
+        layoutTree(tree, connections, treeWrap);
+        layoutTree(treeAlt, connectionsAlt, treeWrapAlt);
+      }
+
+      function render(){
+        updateStats();
+        renderDirectory();
+        renderMembersView();
+        renderPaymentsView();
+        renderCompilation();
+        renderSettings();
+        renderTrees();
+        treeStatus.textContent = state.syncing ? "Syncing" : "Synced";
+        treeStatusAlt.textContent = treeStatus.textContent;
+        profileStatus.textContent = state.syncing ? "Syncing" : "Sync Ready";
+      }
+
+      function showView(view){
+        state.view = view;
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        const active = document.getElementById(`view-${view}`);
+        if (active) active.classList.add("active");
+        document.querySelectorAll(".menuBtn").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
+
+        const titles = {
+          "desktop": ["Network Overview", "Professional member directory + binary tree view, with payment gating and audit-friendly details."],
+          "membership-tree": ["Membership Tree", "Binary tree view with level-locked payments and admin governance."],
+          "members": ["Members", "Full frame member directory with level analytics and direct node access."],
+          "payments": ["Payments", "Admin-controlled payments with completions and reversals."],
+          "compilation": ["Compilation", "Aggregated system intelligence and revenue analysis."],
+          "settings": ["Settings", "Admin profile, account linking, and system configuration."],
+        };
+        const [title, subtitle] = titles[view] || ["Enterprise Console", ""];
+        viewTitle.textContent = title;
+        viewSubtitle.textContent = subtitle;
+
+        if (view === "settings") {
+          viewActions.style.visibility = "hidden";
+        } else {
+          viewActions.style.visibility = "visible";
+        }
+
+        render();
+      }
+
+      function validateMemberPayload(payload){
+        if (!payload.name || !payload.email || !payload.phone || !payload.joinedAt) return "All fields are required.";
+        const parentId = Number(payload.parentId);
+        if (!parentId || !state.members.find(m => m.id === parentId)) return "Parent ID must match an existing member.";
+        const parent = state.members.find(m => m.id === parentId);
+        if (parent.childrenIds.length >= 2) return "Parent already has two children.";
+        return "";
+      }
+
+      function openAddModal(){
+        addModal.classList.add("open");
+        addModal.setAttribute("aria-hidden", "false");
+        addName.value = "";
+        addEmail.value = "";
+        addPhone.value = "";
+        addParent.value = "";
+        addJoined.value = new Date().toISOString().split("T")[0];
+        addName.focus();
+      }
+
+      function closeAddModal(){
+        addModal.classList.remove("open");
+        addModal.setAttribute("aria-hidden", "true");
+      }
+
+      async function createMember(){
+        const payload = {
+          name: addName.value.trim(),
+          email: addEmail.value.trim(),
+          phone: addPhone.value.trim(),
+          parentId: Number(addParent.value.trim()),
+          joinedAt: addJoined.value
+        };
+        const error = validateMemberPayload(payload);
+        if (error) {
+          toastMsg(error);
+          return;
+        }
+        await api.createMember(payload);
+        closeAddModal();
+        toastMsg("Member created.");
+      }
+
+      async function syncPayments(){
+        const synced = await api.syncPayments();
+        toastMsg(synced ? `Synced ${synced} payments.` : "Backend not reachable. Local data active.");
+      }
+
+      async function updateDbStatusPill() {
+        if (!dbStatusPill) return;
+        dbStatusPill.textContent = "DB: checking...";
+        dbStatusPill.style.background = "";
+        dbStatusPill.style.color = "";
+        dbStatusPill.style.borderColor = "";
+        try {
+          const res = await fetch("/api/db-status");
+          const data = await res.json();
+          const connected = !!data.connected;
+          dbStatusPill.textContent = connected ? "DB: YES" : "DB: NO";
+          dbStatusPill.title = data.message || "";
+          if (connected) {
+            dbStatusPill.style.background = "rgba(24,168,95,.16)";
+            dbStatusPill.style.borderColor = "rgba(24,168,95,.38)";
+            dbStatusPill.style.color = "#0f7f45";
+          } else {
+            dbStatusPill.style.background = "rgba(224,85,100,.12)";
+            dbStatusPill.style.borderColor = "rgba(224,85,100,.30)";
+            dbStatusPill.style.color = "#8f2f3c";
+          }
+        } catch (err) {
+          dbStatusPill.textContent = "DB: NO";
+          dbStatusPill.title = err && err.message ? err.message : "Unable to check DB status";
+          dbStatusPill.style.background = "rgba(224,85,100,.12)";
+          dbStatusPill.style.borderColor = "rgba(224,85,100,.30)";
+          dbStatusPill.style.color = "#8f2f3c";
+        }
+      }
+
+      function init(){
+        state.members = buildBinaryMembers(CONFIG.maxLevels);
+        populateLevelFilters();
+        initTheme();
+        render();
+        updateDbStatusPill();
+      }
+
+      const tree = document.getElementById("tree");
+      const connections = document.getElementById("connections");
+      const treeWrap = document.getElementById("treeWrap");
+      const treeAlt = document.getElementById("treeAlt");
+      const connectionsAlt = document.getElementById("connectionsAlt");
+      const treeWrapAlt = document.getElementById("treeWrapAlt");
+
+      const q = document.getElementById("q");
+      const fPayment = document.getElementById("fPayment");
+      const fReach = document.getElementById("fReach");
+      const fLevel = document.getElementById("fLevel");
+      const btnReset = document.getElementById("btnReset");
+
+      const rows = document.getElementById("rows");
+      const dirCount = document.getElementById("dirCount");
+      const pageInfo = document.getElementById("pageInfo");
+      const btnPrev = document.getElementById("btnPrev");
+      const btnNext = document.getElementById("btnNext");
+
+      const statTotal = document.getElementById("statTotal");
+      const statPaid = document.getElementById("statPaid");
+      const statLocked = document.getElementById("statLocked");
+      const statDepth = document.getElementById("statDepth");
+
+      const profileStatus = document.getElementById("profileStatus");
+      const profileMembers = document.getElementById("profileMembers");
+      const pillMembers = document.getElementById("pillMembers");
+      const pillPayments = document.getElementById("pillPayments");
+
+      const treeStatus = document.getElementById("treeStatus");
+      const treeStatusAlt = document.getElementById("treeStatusAlt");
+      const dbStatusPill = document.getElementById("dbStatusPill");
+
+      const membersTotal = document.getElementById("membersTotal");
+      const membersActive = document.getElementById("membersActive");
+      const membersInactive = document.getElementById("membersInactive");
+      const membersLevels = document.getElementById("membersLevels");
+      const levelCounts = document.getElementById("levelCounts");
+      const memberList = document.getElementById("memberList");
+
+      const paymentsSummary = document.getElementById("paymentsSummary");
+      const paymentsCompleted = document.getElementById("paymentsCompleted");
+      const paymentsPending = document.getElementById("paymentsPending");
+      const pLevel = document.getElementById("pLevel");
+      const pStatus = document.getElementById("pStatus");
+      const pDate = document.getElementById("pDate");
+      const btnPaymentsReset = document.getElementById("btnPaymentsReset");
+
+      const compRevenue = document.getElementById("compRevenue");
+      const compCompletion = document.getElementById("compCompletion");
+      const compActive = document.getElementById("compActive");
+      const compDepth = document.getElementById("compDepth");
+      const levelRevenue = document.getElementById("levelRevenue");
+      const depthAnalysis = document.getElementById("depthAnalysis");
+
+      const adminName = document.getElementById("adminName");
+      const adminEmail = document.getElementById("adminEmail");
+      const adminPhone = document.getElementById("adminPhone");
+      const btnSaveAdmin = document.getElementById("btnSaveAdmin");
+      const linkUserId = document.getElementById("linkUserId");
+      const linkExternal = document.getElementById("linkExternal");
+      const btnLinkAccount = document.getElementById("btnLinkAccount");
+      const cfgAmount = document.getElementById("cfgAmount");
+      const cfgLevels = document.getElementById("cfgLevels");
+      const cfgUnlock = document.getElementById("cfgUnlock");
+      const rolePermissions = document.getElementById("rolePermissions");
+      const darkToggle = document.getElementById("darkToggle");
+
+      const modal = document.getElementById("modal");
+      const mClose = document.getElementById("mClose");
+      const mClose2 = document.getElementById("mClose2");
+      const mTitle = document.getElementById("mTitle");
+      const mSub = document.getElementById("mSub");
+      const mBody = document.getElementById("mBody");
+      const mTerms = document.getElementById("mTerms");
+      const mMarkPaid = document.getElementById("mMarkPaid");
+      const mReverse = document.getElementById("mReverse");
+
+      const addModal = document.getElementById("addModal");
+      const addClose = document.getElementById("addClose");
+      const addClose2 = document.getElementById("addClose2");
+      const addName = document.getElementById("addName");
+      const addEmail = document.getElementById("addEmail");
+      const addPhone = document.getElementById("addPhone");
+      const addParent = document.getElementById("addParent");
+      const addJoined = document.getElementById("addJoined");
+      const btnCreateMember = document.getElementById("btnCreateMember");
+
+      const toast = document.getElementById("toast");
+
+      const btnSync = document.getElementById("btnSync");
+      const btnExport = document.getElementById("btnExport");
+      const btnAdd = document.getElementById("btnAdd");
+
+      const viewTitle = document.getElementById("viewTitle");
+      const viewSubtitle = document.getElementById("viewSubtitle");
+      const viewActions = document.getElementById("viewActions");
+
+      subscribe(render);
+
+      document.querySelectorAll(".menuBtn").forEach(btn => {
+        btn.addEventListener("click", () => showView(btn.dataset.view));
+      });
+
+      [q, fPayment, fReach, fLevel].forEach(el => {
+        el.addEventListener("input", () => {
+          state.page = 1;
+          state.filters.query = q.value;
+          state.filters.payment = fPayment.value;
+          state.filters.reach = fReach.value;
+          state.filters.level = fLevel.value;
+          render();
+        });
+        el.addEventListener("change", () => {
+          state.page = 1;
+          state.filters.query = q.value;
+          state.filters.payment = fPayment.value;
+          state.filters.reach = fReach.value;
+          state.filters.level = fLevel.value;
+          render();
+        });
+      });
+
+      btnReset.addEventListener("click", () => {
+        q.value = "";
+        fPayment.value = "all";
+        fReach.value = "all";
+        fLevel.value = "all";
+        state.page = 1;
+        state.filters = { query: "", payment: "all", reach: "all", level: "all" };
+        render();
+      });
+
+      btnPrev.addEventListener("click", () => { state.page = Math.max(1, state.page - 1); render(); });
+      btnNext.addEventListener("click", () => { state.page = state.page + 1; render(); });
+
+      mClose.addEventListener("click", closeModal);
+      mClose2.addEventListener("click", closeModal);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.classList.contains("open")) closeModal(); });
+
+      if (mMarkPaid) mMarkPaid.addEventListener("click", () => { if (state.selectedId) markPaymentCompleted(state.selectedId); });
+      if (mReverse) mReverse.addEventListener("click", () => { if (state.selectedId) reversePayment(state.selectedId); });
+
+      btnSync.addEventListener("click", syncPayments);
+      btnExport.addEventListener("click", exportCsv);
+      btnAdd.addEventListener("click", openAddModal);
+
+      addClose.addEventListener("click", closeAddModal);
+      addClose2.addEventListener("click", closeAddModal);
+      addModal.addEventListener("click", (e) => { if (e.target === addModal) closeAddModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && addModal.classList.contains("open")) closeAddModal(); });
+      btnCreateMember.addEventListener("click", createMember);
+
+      pLevel.addEventListener("change", () => { state.paymentFilters.level = pLevel.value; renderPaymentsView(); });
+      pStatus.addEventListener("change", () => { state.paymentFilters.status = pStatus.value; renderPaymentsView(); });
+      pDate.addEventListener("change", () => { state.paymentFilters.date = pDate.value; renderPaymentsView(); });
+      btnPaymentsReset.addEventListener("click", () => {
+        pLevel.value = "all";
+        pStatus.value = "all";
+        pDate.value = "";
+        state.paymentFilters = { level: "all", status: "all", date: "" };
+        renderPaymentsView();
+      });
+
+      if (darkToggle) {
+        darkToggle.addEventListener("change", () => {
+          applyTheme(darkToggle.checked ? "dark" : "light");
+          renderSettings();
+        });
+      }
+
+      btnSaveAdmin.addEventListener("click", async () => {
+        await api.saveAdminProfile({
+          name: adminName.value.trim(),
+          email: adminEmail.value.trim(),
+          phone: adminPhone.value.trim()
+        });
+        toastMsg("Admin profile updated.");
+      });
+
+      btnLinkAccount.addEventListener("click", async () => {
+        const userId = linkUserId.value.trim();
+        const externalId = linkExternal.value.trim();
+        if (!userId || !externalId) {
+          toastMsg("Provide both internal and external IDs.");
+          return;
+        }
+        await api.linkAccount({ userId, externalId, linkedAt: new Date().toISOString() });
+        toastMsg("Account linked.");
+        linkUserId.value = "";
+        linkExternal.value = "";
+      });
+
+      let resizeT = null;
+      window.addEventListener("resize", () => {
+        window.clearTimeout(resizeT);
+        resizeT = window.setTimeout(renderTrees, 120);
+      });
+
+      init();
+      showView("desktop");
+    </script>
+  </body>
+</html>

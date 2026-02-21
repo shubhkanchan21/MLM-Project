@@ -1,0 +1,133 @@
+require('dotenv').config();
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+});
+
+const employees = [
+  {"id":1,"full_name":"Aarav Kapoor","email":"aarav.kapoor1@example.com","mobile_number":"9123456781","joining_date":"2021-03-15","level":"Level 2"},
+  {"id":2,"full_name":"Aisha Singh","email":"aisha.singh@example.com","mobile_number":"9876543201","joining_date":"2022-07-01","level":"Level 3"},
+  {"id":3,"full_name":"Arjun Mehta","email":"arjun.mehta@example.com","mobile_number":"9812345602","joining_date":"2024-11-20","level":"Level 1"},
+  {"id":4,"full_name":"Avni Sharma","email":"avni.sharma@example.com","mobile_number":"9988776603","joining_date":"2021-12-05","level":"Level 4"},
+  {"id":5,"full_name":"Bhavesh Patel","email":"bhavesh.patel@example.com","mobile_number":"9654321004","joining_date":"2023-01-18","level":"Level 1"},
+  {"id":6,"full_name":"Chitra Nair","email":"chitra.nair@example.com","mobile_number":"9445566705","joining_date":"2022-03-22","level":"Level 3"},
+  {"id":7,"full_name":"Deepak Gupta","email":"deepak.gupta@example.com","mobile_number":"9034567806","joining_date":"2025-06-30","level":"Level 2"},
+  {"id":8,"full_name":"Divya Rao","email":"divya.rao@example.com","mobile_number":"9126789017","joining_date":"2023-09-14","level":"Level 3"},
+  {"id":9,"full_name":"Esha Verma","email":"esha.verma@example.com","mobile_number":"9890011228","joining_date":"2021-05-09","level":"Level 1"},
+  {"id":10,"full_name":"Farhan Khan","email":"farhan.khan@example.com","mobile_number":"9765432199","joining_date":"2024-02-27","level":"Level 4"},
+  {"id":11,"full_name":"Gaurav Iyer","email":"gaurav.iyer@example.com","mobile_number":"9701234500","joining_date":"2021-08-16","level":"Level 2"},
+  {"id":12,"full_name":"Harini Reddy","email":"harini.reddy@example.com","mobile_number":"9820098761","joining_date":"2022-10-03","level":"Level 3"},
+  {"id":13,"full_name":"Ishan Bhatia","email":"ishan.bhatia@example.com","mobile_number":"9612345672","joining_date":"2023-11-11","level":"Level 1"},
+  {"id":14,"full_name":"Jaya Menon","email":"jaya.menon@example.com","mobile_number":"9098765433","joining_date":"2025-01-05","level":"Level 4"},
+  {"id":15,"full_name":"Karan Joshi","email":"karan.joshi@example.com","mobile_number":"9865432104","joining_date":"2021-04-28","level":"Level 2"},
+  {"id":16,"full_name":"Kavya Kulkarni","email":"kavya.kulkarni@example.com","mobile_number":"9810092345","joining_date":"2022-12-19","level":"Level 3"},
+  {"id":17,"full_name":"Lakshya Mathur","email":"lakshya.mathur@example.com","mobile_number":"9901122336","joining_date":"2026-07-07","level":"Level 1"},
+  {"id":18,"full_name":"Meera Shah","email":"meera.shah@example.com","mobile_number":"9632587417","joining_date":"2023-06-21","level":"Level 2"},
+  {"id":19,"full_name":"Nikhil Desai","email":"nikhil.desai@example.com","mobile_number":"9778899008","joining_date":"2021-09-30","level":"Level 3"},
+  {"id":20,"full_name":"Nisha Choudhary","email":"nisha.choudhary@example.com","mobile_number":"9001122339","joining_date":"2024-05-12","level":"Level 4"},
+  {"id":21,"full_name":"Om Prakash","email":"om.prakash@example.com","mobile_number":"9556677880","joining_date":"2022-01-02","level":"Level 1"},
+  {"id":22,"full_name":"Pallavi Sinha","email":"pallavi.sinha@example.com","mobile_number":"9441122331","joining_date":"2025-11-23","level":"Level 2"},
+  {"id":23,"full_name":"Raghav Pillai","email":"raghav.pillai@example.com","mobile_number":"9870011222","joining_date":"2023-04-08","level":"Level 3"},
+  {"id":24,"full_name":"Ritu Roy","email":"ritu.roy@example.com","mobile_number":"9891234503","joining_date":"2021-10-14","level":"Level 4"},
+  {"id":25,"full_name":"Sahil Kumar","email":"sahil.kumar@example.com","mobile_number":"9623456784","joining_date":"2024-09-01","level":"Level 1"},
+  {"id":26,"full_name":"Sanya Agarwal","email":"sanya.agarwal@example.com","mobile_number":"9467123455","joining_date":"2022-06-06","level":"Level 2"},
+  {"id":27,"full_name":"Tara Dixit","email":"tara.dixit@example.com","mobile_number":"9801234566","joining_date":"2023-02-17","level":"Level 3"},
+  {"id":28,"full_name":"Uday Bhaskar","email":"uday.bhaskar@example.com","mobile_number":"9977456327","joining_date":"2021-07-29","level":"Level 4"},
+  {"id":29,"full_name":"Varun Nambiar","email":"varun.nambiar@example.com","mobile_number":"9709988778","joining_date":"2026-12-15","level":"Level 1"},
+  {"id":30,"full_name":"Vidya Nair","email":"vidya.nair@example.com","mobile_number":"9887766559","joining_date":"2022-11-30","level":"Level 2"},
+  {"id":31,"full_name":"Yashraj Singh","email":"yashraj.singh@example.com","mobile_number":"9650012340","joining_date":"2023-12-05","level":"Level 3"},
+  {"id":32,"full_name":"Zara Khan","email":"zara.khan@example.com","mobile_number":"9760011221","joining_date":"2021-02-01","level":"Level 4"},
+  {"id":33,"full_name":"Ananya Ghosh","email":"ananya.ghosh@example.com","mobile_number":"9487766552","joining_date":"2024-08-19","level":"Level 2"},
+  {"id":34,"full_name":"Bimal Roy","email":"bimal.roy@example.com","mobile_number":"9933112253","joining_date":"2021-06-25","level":"Level 3"},
+  {"id":35,"full_name":"Charu Sen","email":"charu.sen@example.com","mobile_number":"9678901234","joining_date":"2022-05-04","level":"Level 2"},
+  {"id":36,"full_name":"Dinesh Khatri","email":"dinesh.khatri@example.com","mobile_number":"9791234565","joining_date":"2026-03-03","level":"Level 5"},
+  {"id":37,"full_name":"Ekta Yadav","email":"ekta.yadav@example.com","mobile_number":"9460012346","joining_date":"2021-11-20","level":"Level 2"},
+  {"id":38,"full_name":"Faisal Shaikh","email":"faisal.shaikh@example.com","mobile_number":"9894455667","joining_date":"2023-07-29","level":"Level 3"},
+  {"id":39,"full_name":"Gita Raman","email":"gita.raman@example.com","mobile_number":"9814455668","joining_date":"2024-12-12","level":"Level 4"},
+  {"id":40,"full_name":"Hitesh Solanki","email":"hitesh.solanki@example.com","mobile_number":"9723344559","joining_date":"2025-03-18","level":"Level 5"},
+  {"id":41,"full_name":"Ishita Sood","email":"ishita.sood@example.com","mobile_number":"9610099880","joining_date":"2022-09-09","level":"Level 2"},
+  {"id":42,"full_name":"Jatin Verma","email":"jatin.verma@example.com","mobile_number":"9955566671","joining_date":"2021-01-13","level":"Level 3"},
+  {"id":43,"full_name":"Kirti Deshmukh","email":"kirti.deshmukh@example.com","mobile_number":"9844012342","joining_date":"2023-05-27","level":"Level 4"},
+  {"id":44,"full_name":"Lata Kapoor","email":"lata.kapoor@example.com","mobile_number":"9523410983","joining_date":"2022-02-14","level":"Level 5"},
+  {"id":45,"full_name":"Mohit Bedi","email":"mohit.bedi@example.com","mobile_number":"9033011224","joining_date":"2024-04-04","level":"Level 2"},
+  {"id":46,"full_name":"Neelam Goel","email":"neelam.goel@example.com","mobile_number":"9401122335","joining_date":"2021-03-30","level":"Level 3"},
+  {"id":47,"full_name":"Ojaswi Patel","email":"ojaswi.patel@example.com","mobile_number":"9667788996","joining_date":"2022-08-08","level":"Level 5"},
+  {"id":48,"full_name":"Prachi Nagle","email":"prachi.nagle@example.com","mobile_number":"9101122337","joining_date":"2023-10-10","level":"Level 2"},
+  {"id":49,"full_name":"Qadir Ansari","email":"qadir.ansari@example.com","mobile_number":"9705567898","joining_date":"2025-02-25","level":"Level 3"},
+  {"id":50,"full_name":"Rakesh Nair","email":"rakesh.nair@example.com","mobile_number":"9816677889","joining_date":"2021-12-31","level":"Level 5"},
+  {"id":51,"full_name":"Shreya Banerjee","email":"shreya.banerjee@example.com","mobile_number":"9630091220","joining_date":"2024-06-06","level":"Level 2"},
+  {"id":52,"full_name":"Tanvi Kaur","email":"tanvi.kaur@example.com","mobile_number":"9892003341","joining_date":"2022-04-12","level":"Level 3"},
+  {"id":53,"full_name":"Usha Thakur","email":"usha.thakur@example.com","mobile_number":"9768899002","joining_date":"2023-01-07","level":"Level 4"},
+  {"id":54,"full_name":"Veerendra Sethi","email":"veerendra.sethi@example.com","mobile_number":"9912345609","joining_date":"2026-10-20","level":"Level 5"},
+  {"id":55,"full_name":"Waseem Mirza","email":"waseem.mirza@example.com","mobile_number":"9712345605","joining_date":"2021-05-21","level":"Level 2"},
+  {"id":56,"full_name":"Xara D'Souza","email":"xara.dsouza@example.com","mobile_number":"9909988776","joining_date":"2024-01-15","level":"Level 3"},
+  {"id":57,"full_name":"Yuvraj Solanki","email":"yuvraj.solanki@example.com","mobile_number":"9580012347","joining_date":"2022-07-18","level":"Level 4"},
+  {"id":58,"full_name":"Zarina Pervez","email":"zarina.pervez@example.com","mobile_number":"9009988772","joining_date":"2021-09-05","level":"Level 3"},
+  {"id":59,"full_name":"Amitabh Rao","email":"amitabh.rao@example.com","mobile_number":"9470011229","joining_date":"2023-03-03","level":"Level 2"},
+  {"id":60,"full_name":"Bhuvaneshwar Iyer","email":"bhuvaneshwar.iyer@example.com","mobile_number":"9840098764","joining_date":"2025-08-29","level":"Level 3"},
+  {"id":61,"full_name":"Chandni Kapoor","email":"chandni.kapoor@example.com","mobile_number":"9771234506","joining_date":"2026-11-11","level":"Level 4"},
+  {"id":62,"full_name":"Deepa Nair","email":"deepa.nair@example.com","mobile_number":"9620091128","joining_date":"2022-10-28","level":"Level 2"}
+];
+
+async function seed() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Create schema + table if not exists
+    await client.query(`CREATE SCHEMA IF NOT EXISTS core`);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS core.employees (
+        id integer PRIMARY KEY,
+        full_name text NOT NULL,
+        email text UNIQUE NOT NULL,
+        mobile_number varchar(10) UNIQUE NOT NULL,
+        joining_date date NOT NULL,
+        level text NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+
+    await client.query(`
+      ALTER TABLE core.employees
+      ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now()
+    `);
+    await client.query(`
+      ALTER TABLE core.employees
+      ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now()
+    `);
+
+    const insertText = `INSERT INTO core.employees (id, full_name, email, mobile_number, joining_date, level)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (id) DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        email = EXCLUDED.email,
+        mobile_number = EXCLUDED.mobile_number,
+        joining_date = EXCLUDED.joining_date,
+        level = EXCLUDED.level,
+        updated_at = now()`;
+
+    for (const e of employees) {
+      const vals = [e.id, e.full_name, e.email, e.mobile_number, e.joining_date, e.level];
+      await client.query(insertText, vals);
+    }
+
+    await client.query('COMMIT');
+    console.log('Seed complete: inserted/updated', employees.length, 'records into core.employees');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Seed failed:', err.message);
+    process.exitCode = 1;
+  } finally {
+    client.release();
+    await pool.end();
+  }
+}
+
+if (require.main === module) seed();
