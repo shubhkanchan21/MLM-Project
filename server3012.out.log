@@ -1,0 +1,5 @@
+[dotenv@17.2.4] injecting env (6) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+[dotenv@17.2.4] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+Server running on port 3012
+initialized core.employers table
+initialized core.employees table

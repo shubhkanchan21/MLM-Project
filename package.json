@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "start:8080": "set PORT=8080&& node index.js",
+    "check:db": "node test_conn.js",
+    "seed:admin": "node seed_admin_user.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

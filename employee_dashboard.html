@@ -1,0 +1,732 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Employee Dashboard</title>
+  <style>
+    :root {
+      
+      --bg: #f3f6fb;
+      --surface: #ffffff;
+      --surface-2: #f8fbff;
+      --text: #13243b;
+      --muted: #607089;
+      --line: #d8e1ee;
+      --primary: #1f5eff;
+      --primary-2: #151516;
+      --danger: #c62828;
+      --ok: #1f7a44;
+      --warn-bg: #fff6e8;
+      --warn-tx: #9f6100;
+      --radius: 14px;
+      --shadow: 0 18px 46px rgba(19, 36, 59, 0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(1000px 420px at 0% -10%, #dce9ff 0, transparent 70%),
+        radial-gradient(900px 380px at 110% 0%, #e2fff2 0, transparent 65%),
+        var(--bg);
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 20px 30px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .banner {
+      display: none;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      padding: 12px 14px;
+      font-size: 0.93rem;
+      font-weight: 600;
+    }
+
+    .hero {
+      background: linear-gradient(130deg, #101d36, #153763 58%, #2563b5);
+      color: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hero p {
+      margin: 7px 0 0;
+      color: #d8e8ff;
+      font-size: 0.95rem;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(19, 36, 59, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(130deg, var(--primary), #3c77ff);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: linear-gradient(130deg, var(--primary-2), var(--primary)); }
+    .btn-muted { background: #e9eef8; color: #22314a; }
+    .btn-success { background: #18984d; color: #fff; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px rgba(19, 36, 59, 0.06);
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      color: #1a2f4a;
+    }
+
+    .login-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .input, .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.94rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .input:focus, .select:focus {
+      border-color: #8db1ff;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(31, 94, 255, 0.15);
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #eff4ff;
+      color: #254166;
+      text-align: left;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody td {
+      padding: 12px;
+      border-bottom: 1px solid #e6edf7;
+      font-size: 0.92rem;
+      vertical-align: top;
+    }
+
+    tbody tr:hover { background: #f7faff; }
+    .row-paid { background: #f2fff6; }
+    .row-unpaid { background: #fff5f5; }
+
+    .chip {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .chip-paid { background: #d6f5e0; color: #0f6d38; }
+    .chip-unpaid { background: #ffe1e1; color: #9f2020; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 18, 32, .58);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-card {
+      width: min(680px, 100%);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-head h3 { margin: 0; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    .msg {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 44px;
+      font-size: 0.92rem;
+      background: var(--surface-2);
+    }
+
+    .msg.err { color: var(--danger); }
+    .msg.ok { color: var(--ok); }
+
+    @media (max-width: 900px) {
+      .page { padding: 16px; }
+      .login-grid { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.42rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div id="banner" class="banner"></div>
+
+    <section class="hero">
+      <div>
+        <h1>Employee Operations Dashboard</h1>
+        <p>Search by ID/User ID/Email/Mobile, and add new employees securely.</p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input id="importFile" type="file" accept=".json,.csv,.pdf,.txt" style="display:none;" />
+        <button id="importBtn" class="btn btn-muted">Import File</button>
+        <button id="addBtn" class="btn btn-primary">Add Employee</button>
+      </div>
+    </section>
+
+    <section id="loginSection" class="panel">
+      <h2>Login</h2>
+      <div class="login-grid">
+        <div>
+          <label class="label" for="loginEmail">Admin ID / Email</label>
+          <input id="loginEmail" class="input" type="text" placeholder="aditya31" />
+        </div>
+        <div>
+          <label class="label" for="loginPassword">Password</label>
+          <input id="loginPassword" class="input" type="password" placeholder="********" />
+        </div>
+        <button id="loginBtn" class="btn btn-success" style="height:40px;">Login</button>
+      </div>
+      <div id="loginMsg" class="msg" style="margin-top:12px;"></div>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <input id="searchBox" class="input" type="search" placeholder="Search by User ID, Name, Email, Mobile, or DB ID" />
+        <button id="refreshBtn" class="btn btn-muted">Refresh</button>
+      </div>
+
+      <div class="table-wrap" style="margin-top:12px;">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Joining Date</th>
+              <th>Level</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Add New Employee</h3>
+        <button id="cancelBtn" class="btn btn-muted">Close</button>
+      </div>
+
+      <form id="addForm" class="form-grid">
+        <div>
+          <label class="label">User ID (optional)</label>
+          <input name="user_id" class="input" placeholder="EMP00063" />
+        </div>
+        <div>
+          <label class="label">Full Name</label>
+          <input name="full_name" class="input" required />
+        </div>
+        <div>
+          <label class="label">Email</label>
+          <input name="email" class="input" type="email" required />
+        </div>
+        <div>
+          <label class="label">Mobile Number</label>
+          <input name="mobile_number" class="input" placeholder="9876543210" />
+        </div>
+        <div>
+          <label class="label">Joining Date</label>
+          <input name="joining_date" class="input" type="date" required />
+        </div>
+        <div>
+          <label class="label">Level</label>
+          <input name="level" class="input" placeholder="Level 2" />
+        </div>
+        <div class="full">
+          <label class="label">Payment Status</label>
+          <select name="payment_status" class="select">
+            <option value="NOT_COMPLETED">Not Completed</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+        <div class="full" style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="btn btn-primary">Save Employee</button>
+        </div>
+      </form>
+
+      <div id="addMsg" class="msg"></div>
+    </div>
+  </div>
+
+  <script>
+    const origin = window.location.origin;
+    const FALLBACK_API = 'http://localhost:3000';
+    const API_CANDIDATES = [origin, FALLBACK_API, 'http://localhost:3010', 'http://localhost:3015'];
+    let apiBase = localStorage.getItem('apiBase') || FALLBACK_API;
+    let loadAbortController = null;
+
+    const banner = document.getElementById('banner');
+    const loginSection = document.getElementById('loginSection');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginMsg = document.getElementById('loginMsg');
+
+    const searchBox = document.getElementById('searchBox');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const addBtn = document.getElementById('addBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const modal = document.getElementById('modal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const addForm = document.getElementById('addForm');
+    const addMsg = document.getElementById('addMsg');
+
+    function showBanner(msg, type) {
+      banner.style.display = 'block';
+      banner.textContent = msg;
+      if (type === 'error') {
+        banner.style.background = '#ffe9e9';
+        banner.style.color = '#9f2020';
+        banner.style.borderColor = '#f5c6c6';
+      } else if (type === 'warn') {
+        banner.style.background = 'var(--warn-bg)';
+        banner.style.color = 'var(--warn-tx)';
+        banner.style.borderColor = '#f4d8a0';
+      } else {
+        banner.style.background = '#e8faef';
+        banner.style.color = '#166a3e';
+        banner.style.borderColor = '#bce9cc';
+      }
+    }
+
+    function setMsg(el, msg, ok) {
+      el.className = `msg ${ok ? 'ok' : 'err'}`;
+      el.textContent = msg;
+    }
+
+    async function readResponseSafely(res) {
+      const text = await res.text();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { raw: text };
+      }
+    }
+
+    async function resolveApiBase() {
+      const candidates = [
+        origin,
+        apiBase,
+        FALLBACK_API,
+        'http://localhost:3010',
+        'http://localhost:3015'
+      ].filter((v, i, a) => a.indexOf(v) === i);
+      for (const base of candidates) {
+        try {
+          const res = await fetch(`${base}/api/db-status`);
+          const body = await readResponseSafely(res);
+          if (res.ok && body && body.connected === true) {
+            apiBase = base;
+            localStorage.setItem('apiBase', apiBase);
+            showBanner(`Connected to backend: ${apiBase}`, 'ok');
+            return;
+          }
+        } catch {}
+      }
+      apiBase = FALLBACK_API;
+      localStorage.setItem('apiBase', apiBase);
+      showBanner('Backend not detected automatically. Ensure API is running on http://localhost:3000.', 'warn');
+    }
+
+    function apiUrl(path) {
+      return `${apiBase}${path}`;
+    }
+
+    async function apiFetch(path, options = {}) {
+      const orderedBases = [apiBase, ...API_CANDIDATES].filter((v, i, a) => a.indexOf(v) === i);
+      let lastErr = null;
+      for (const base of orderedBases) {
+        try {
+          const res = await fetch(`${base}${path}`, options);
+          const contentType = (res.headers.get('content-type') || '').toLowerCase();
+          const wrongServerResponse =
+            res.status === 404 ||
+            res.status === 405 ||
+            contentType.includes('text/html');
+
+          if (wrongServerResponse) {
+            lastErr = new Error(`Wrong server response (${res.status}) from ${base}`);
+            continue;
+          }
+
+          apiBase = base;
+          localStorage.setItem('apiBase', apiBase);
+          if (path === '/auth/login' || path.startsWith('/employees')) {
+            showBanner(`Using backend: ${apiBase}`, 'ok');
+          }
+          return res;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw new Error('Backend unreachable. Start server: cd "database(sql)" && npm start');
+    }
+
+    function paymentChip(status) {
+      if (status === 'COMPLETED') {
+        return '<span class="chip chip-paid">COMPLETED</span>';
+      }
+      return '<span class="chip chip-unpaid">NOT_COMPLETED</span>';
+    }
+
+    function normalizeImportedRow(row) {
+      const get = (keys) => {
+        for (const k of keys) {
+          if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
+        }
+        return '';
+      };
+      return {
+        user_id: get(['user_id', 'userId', 'User ID']) || undefined,
+        full_name: get(['full_name', 'fullName', 'name', 'Name']),
+        email: get(['email', 'Email']),
+        mobile_number: get(['mobile_number', 'mobile', 'phone', 'Mobile']),
+        joining_date: get(['joining_date', 'joiningDate', 'date', 'Joining Date']),
+        level: get(['level', 'Level']) || undefined,
+        payment_status: (get(['payment_status', 'paymentStatus', 'payment']) || 'NOT_COMPLETED').toUpperCase()
+      };
+    }
+
+    function parseCSV(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map((h) => h.trim());
+      return lines.slice(1).map((line) => {
+        const cols = line.split(',').map((c) => c.trim());
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = cols[idx] ?? ''; });
+        return normalizeImportedRow(obj);
+      }).filter((r) => r.full_name && r.email && r.joining_date);
+    }
+
+    function parsePdfLikeText(text) {
+      const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const rows = [];
+      for (const line of lines) {
+        const parts = line.split(/[|,]/).map((p) => p.trim());
+        if (parts.length < 3) continue;
+        const guess = normalizeImportedRow({
+          user_id: parts[0],
+          full_name: parts[1],
+          email: parts[2],
+          mobile_number: parts[3] || '',
+          joining_date: parts[4] || '',
+          level: parts[5] || '',
+          payment_status: parts[6] || 'NOT_COMPLETED'
+        });
+        if (guess.full_name && guess.email && guess.joining_date) rows.push(guess);
+      }
+      return rows;
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+      if (!email || !password) {
+        setMsg(loginMsg, 'Provide both email and password.', false);
+        return;
+      }
+
+      try {
+        const res = await apiFetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const body = await readResponseSafely(res);
+        if (!res.ok) throw new Error(body.error || body.raw || `Login failed (${res.status})`);
+        if (!body.token) throw new Error('Token missing in login response.');
+
+        localStorage.setItem('token', body.token);
+        setMsg(loginMsg, 'Login successful. Token saved.', true);
+        loginSection.style.display = 'none';
+        load();
+      } catch (e) {
+        setMsg(loginMsg, e.message, false);
+      }
+    });
+
+    refreshBtn.addEventListener('click', load);
+    searchBox.addEventListener('input', () => {
+      clearTimeout(window.__searchTimer);
+      window.__searchTimer = setTimeout(load, 120);
+    });
+
+    addBtn.addEventListener('click', () => {
+      addMsg.textContent = '';
+      modal.classList.add('show');
+    });
+
+    importBtn.addEventListener('click', () => importFile.click());
+
+    importFile.addEventListener('change', async () => {
+      const file = importFile.files && importFile.files[0];
+      if (!file) return;
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showBanner('Login required before import.', 'warn');
+        importFile.value = '';
+        return;
+      }
+
+      try {
+        let rows = [];
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        const text = await file.text();
+        if (ext === 'json') {
+          const arr = JSON.parse(text);
+          rows = (Array.isArray(arr) ? arr : []).map(normalizeImportedRow);
+        } else if (ext === 'csv' || ext === 'txt') {
+          rows = parseCSV(text);
+        } else if (ext === 'pdf') {
+          rows = parsePdfLikeText(text);
+        }
+
+        rows = rows.filter((r) => r.full_name && r.email && r.joining_date);
+        if (rows.length === 0) {
+          throw new Error('No valid employee rows found in file.');
+        }
+
+        showBanner(`Importing ${rows.length} records...`, 'warn');
+        const res = await apiFetch('/employees/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ employees: rows })
+        });
+        const body = await readResponseSafely(res);
+        if (!res.ok) {
+          throw new Error(body.error || body.raw || `Import failed (${res.status})`);
+        }
+        showBanner(`Import complete: ${body.inserted || 0} employees added.`, 'ok');
+        load();
+      } catch (e) {
+        showBanner(e.message, 'error');
+      } finally {
+        importFile.value = '';
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => modal.classList.remove('show'));
+
+    addForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(addForm));
+      if (!data.user_id) delete data.user_id;
+      if (!data.mobile_number) delete data.mobile_number;
+      if (!data.level) delete data.level;
+
+      setMsg(addMsg, 'Saving employee...', true);
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await apiFetch('/employees', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+          },
+          body: JSON.stringify(data)
+        });
+
+        const body = await readResponseSafely(res);
+        if (!res.ok) {
+          throw new Error(body.error || body.raw || `Save failed (${res.status})`);
+        }
+
+        setMsg(addMsg, 'Employee added successfully.', true);
+        modal.classList.remove('show');
+        addForm.reset();
+        showBanner('Employee record added.', 'ok');
+        load();
+      } catch (e) {
+        setMsg(addMsg, e.message, false);
+      }
+    });
+
+    async function load() {
+      const token = localStorage.getItem('token');
+      const searchValue = encodeURIComponent(searchBox.value.trim());
+
+      if (loadAbortController) loadAbortController.abort();
+      loadAbortController = new AbortController();
+
+      try {
+        const res = await apiFetch(`/employees?search=${searchValue}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: loadAbortController.signal
+        });
+        const body = await readResponseSafely(res);
+        if (!res.ok) {
+          throw new Error(body.error || body.raw || `Load failed (${res.status})`);
+        }
+
+        const arr = Array.isArray(body) ? body : (body.data || body.users || []);
+        const tbody = document.querySelector('#tbl tbody');
+
+        tbody.innerHTML = arr.map((u) => {
+          const rowClass = u.payment_status === 'COMPLETED' ? 'row-paid' : 'row-unpaid';
+          return `
+            <tr class="${rowClass}">
+              <td>${u.id ?? ''}</td>
+              <td>${u.user_id ?? ''}</td>
+              <td>${u.full_name ?? ''}</td>
+              <td>${u.email ?? ''}</td>
+              <td>${u.mobile_number ?? ''}</td>
+              <td>${u.joining_date ?? ''}</td>
+              <td>${u.level ?? ''}</td>
+              <td>${paymentChip(u.payment_status)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        if (arr.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#66758f;">No employees found.</td></tr>';
+        }
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        showBanner(e.message, 'error');
+      }
+    }
+
+    (async () => {
+      if (!origin.startsWith('http')) {
+        showBanner('Serve this page over http(s); API calls fail from file://.', 'warn');
+      }
+      await resolveApiBase();
+      if (localStorage.getItem('token')) {
+        loginSection.style.display = 'none';
+      }
+      load();
+    })();
+  </script>
+</body>
+</html>
+

@@ -3,7 +3,9 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Layout from "./components/Layout.jsx";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = (typeof window !== 'undefined' && window.location && window.location.origin)
+  ? window.location.origin
+  : "http://localhost:3000";
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use((config) => {

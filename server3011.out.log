@@ -1,0 +1,5 @@
+[dotenv@17.2.4] injecting env (6) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.4] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Server running on port 3011
+initialized core.employers table
+initialized core.employees table
